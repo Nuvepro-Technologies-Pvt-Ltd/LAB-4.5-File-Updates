@@ -1,0 +1,1643 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab 4.5 — AI Gateway &amp; Orchestrator | Enterprise AI Banking Platform</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+    :root {
+      --bg:      #0d1117;
+      --s1:      #161b27;
+      --s2:      #1e2438;
+      --border:  #2a3050;
+      --accent:  #6c8fff;
+      --purple:  #a78bfa;
+      --green:   #34d399;
+      --amber:   #fbbf24;
+      --red:     #f87171;
+      --cyan:    #22d3ee;
+      --pink:    #f472b6;
+      --text:    #e2e8f0;
+      --muted:   #94a3b8;
+      --dim:     #64748b;
+      --java:    #e8976b;
+      --python:  #4da6ff;
+    }
+
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.75}
+    p{color:var(--muted);margin-bottom:14px}
+    ul,ol{color:var(--muted);padding-left:22px;margin-bottom:14px}
+    li{margin-bottom:6px}
+    strong{color:var(--text)}
+    code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--s2);color:#93c5fd;padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+
+    /* ── NAV ── */
+    nav{position:sticky;top:0;z-index:200;background:rgba(13,17,23,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 36px;display:flex;align-items:center;gap:6px;overflow-x:auto}
+    .nav-logo{font-size:13px;font-weight:700;color:var(--text);padding:14px 16px 14px 0;border-right:1px solid var(--border);margin-right:4px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+    .nav-badge{background:rgba(108,143,255,.15);border:1px solid rgba(108,143,255,.35);color:var(--accent);font-size:10px;font-weight:700;padding:2px 8px;border-radius:4px;text-transform:uppercase;letter-spacing:.5px;transition:all .2s}
+
+    /* ── DAY SELECTOR IN NAV ── */
+    .day-selector-wrap{display:flex;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:3px;margin:0 10px;gap:4px}
+    .day-pill-btn{display:inline-flex;align-items:center;gap:8px;padding:7px 15px;border-radius:6px;font-size:12px;font-weight:700;color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;white-space:nowrap}
+    .day-pill-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
+    .day-pill-btn.active{background:rgba(108,143,255,.18);color:var(--accent);border-color:rgba(108,143,255,.4);box-shadow:0 0 12px rgba(108,143,255,.15)}
+    .day-pill-btn.d2.active{background:rgba(52,211,153,.15);color:var(--green);border-color:rgba(52,211,153,.35);box-shadow:0 0 12px rgba(52,211,153,.12)}
+    .day-pill-tag{font-size:10px;text-transform:uppercase;letter-spacing:1px;padding:2px 6px;border-radius:4px;background:rgba(255,255,255,.08)}
+    .day-pill-btn.active .day-pill-tag{background:var(--accent);color:#0d1117}
+    .day-pill-btn.d2.active .day-pill-tag{background:var(--green);color:#0d1117}
+
+    .nav-divider{width:1px;height:24px;background:var(--border);margin:0 4px}
+    .nav-links-wrap{display:flex;align-items:center;gap:2px}
+    nav a{padding:14px 11px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;text-decoration:none;transition:all .15s}
+    nav a:hover{color:var(--accent);border-color:var(--accent)}
+
+    /* ── HERO ── */
+    .hero{background:linear-gradient(135deg,#0d1117 0%,#10183a 45%,#0d1a20 100%);border-bottom:1px solid var(--border);padding:54px 48px 48px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-80px;right:-80px;width:500px;height:500px;background:radial-gradient(circle,rgba(108,143,255,.08) 0%,transparent 70%);pointer-events:none}
+    .hero::after{content:'';position:absolute;bottom:-60px;left:35%;width:400px;height:400px;background:radial-gradient(circle,rgba(34,211,238,.05) 0%,transparent 70%);pointer-events:none}
+    .hero-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:14px}
+    .hero h1{font-size:38px;font-weight:800;line-height:1.2;background:linear-gradient(135deg,#e2e8f0 0%,#6c8fff 50%,#22d3ee 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px}
+    .hero-sub{font-size:15.5px;color:var(--muted);max-width:760px;line-height:1.8;margin-bottom:26px}
+    .hero-flow{display:flex;align-items:center;gap:0;flex-wrap:wrap;margin-bottom:26px}
+    .hf-step{background:rgba(108,143,255,.08);border:1px solid rgba(108,143,255,.25);border-radius:8px;padding:9px 16px;font-size:12.5px;font-weight:500;color:var(--accent)}
+    .hf-step.done{background:rgba(52,211,153,.06);border-color:rgba(52,211,153,.25);color:var(--green)}
+    .hf-step.now{background:rgba(251,191,36,.09);border-color:rgba(251,191,36,.35);color:var(--amber)}
+    .hf-arrow{font-size:16px;color:var(--dim);padding:0 8px}
+    .hero-chips{display:flex;gap:10px;flex-wrap:wrap}
+    .chip{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;color:var(--muted)}
+    .chip.blue{background:rgba(108,143,255,.08);border-color:rgba(108,143,255,.3);color:var(--accent)}
+    .chip.green{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.25);color:var(--green)}
+    .chip.amber{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.25);color:var(--amber)}
+    .chip.cyan{background:rgba(34,211,238,.07);border-color:rgba(34,211,238,.25);color:var(--cyan)}
+    .chip.purple{background:rgba(167,139,250,.08);border-color:rgba(167,139,250,.3);color:var(--purple)}
+
+    /* ── LAYOUT ── */
+    .wrap{max-width:1100px;margin:0 auto;padding:50px 48px}
+    .section{margin-bottom:60px}
+    .sec-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:18px;display:flex;align-items:center;gap:10px}
+    .sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+    h2{font-size:27px;font-weight:700;color:var(--text);margin-bottom:12px}
+    h3{font-size:17px;font-weight:600;color:var(--text);margin-bottom:10px;margin-top:24px}
+    h4{font-size:14px;font-weight:600;color:var(--muted);margin-bottom:8px;text-transform:uppercase;letter-spacing:.6px}
+
+    /* ── DAY VIEWS & TRANSITIONS ── */
+    .day-view{animation:fadeIn .22s ease-in-out}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+
+    .day-milestone-card{background:linear-gradient(135deg,#161b27 0%,#101d33 100%);border:1px solid rgba(108,143,255,.3);border-radius:14px;padding:26px 30px;margin:32px 0 12px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+    .day-milestone-info{flex:1;min-width:280px}
+    .day-milestone-title{font-size:17px;font-weight:700;color:var(--text);margin-bottom:6px}
+    .day-milestone-desc{font-size:13px;color:var(--muted);margin:0}
+    .btn-advance{background:linear-gradient(135deg,#6c8fff 0%,#3b82f6 100%);color:#fff;border:none;padding:12px 22px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:all .15s;font-family:'Inter',sans-serif;box-shadow:0 4px 14px rgba(108,143,255,.3)}
+    .btn-advance:hover{transform:translateY(-1px);box-shadow:0 6px 18px rgba(108,143,255,.45)}
+    .btn-back{background:var(--s2);color:var(--muted);border:1px solid var(--border);padding:9px 18px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:all .15s;font-family:'Inter',sans-serif}
+    .btn-back:hover{color:var(--text);background:var(--s1);border-color:var(--accent)}
+
+    /* ── GRIDS ── */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .g4{display:grid;grid-template-columns:repeat(auto-fit, minmax(220px, 1fr));gap:14px}
+
+    /* ── CARDS ── */
+    .card{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+    .card-head{padding:16px 22px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+    .card-head.blue{color:var(--accent);background:rgba(108,143,255,.06)}
+    .card-head.green{color:var(--green);background:rgba(52,211,153,.05)}
+    .card-head.amber{color:var(--amber);background:rgba(251,191,36,.05)}
+    .card-head.cyan{color:var(--cyan);background:rgba(34,211,238,.05)}
+    .card-head.purple{color:var(--purple);background:rgba(167,139,250,.05)}
+    .card-head.red{color:var(--red);background:rgba(248,113,113,.05)}
+    .card-body{padding:22px;font-size:13px}
+    .card-body p{font-size:13px}
+
+    /* ── CALLOUT ── */
+    .callout{border-radius:10px;padding:16px 20px;margin:16px 0;font-size:13px}
+    .callout p{font-size:13px;margin:0}
+    .callout-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+    .cb-blue{background:rgba(108,143,255,.06);border:1px solid rgba(108,143,255,.2);border-left:3px solid var(--accent)}
+    .cb-blue .callout-lbl{color:var(--accent)}
+    .cb-green{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-left:3px solid var(--green)}
+    .cb-green .callout-lbl{color:var(--green)}
+    .cb-amber{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-left:3px solid var(--amber)}
+    .cb-amber .callout-lbl{color:var(--amber)}
+    .cb-red{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-left:3px solid var(--red)}
+    .cb-red .callout-lbl{color:var(--red)}
+    .cb-cyan{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-left:3px solid var(--cyan)}
+    .cb-cyan .callout-lbl{color:var(--cyan)}
+    .cb-purple{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-left:3px solid var(--purple)}
+    .cb-purple .callout-lbl{color:var(--purple)}
+
+    /* ── CODE ── */
+    .code-wrap{background:#080c18;border:1px solid var(--border);border-radius:12px;overflow:hidden;margin:14px 0}
+    .code-hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:10px 18px;display:flex;align-items:center;gap:8px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .code-title{font-size:11px;font-weight:600;color:var(--dim);letter-spacing:.4px;flex:1;margin-left:4px}
+    .code-tag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 10px;border-radius:4px}
+    .tag-java{background:rgba(232,151,107,.12);color:var(--java);border:1px solid rgba(232,151,107,.3)}
+    .tag-json{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}
+    .tag-py{background:rgba(77,166,255,.1);color:var(--python);border:1px solid rgba(77,166,255,.25)}
+    .tag-shell{background:rgba(251,191,36,.08);color:var(--amber);border:1px solid rgba(251,191,36,.25)}
+    pre.code{padding:20px 22px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;overflow-x:auto;white-space:pre;color:#cbd5e1}
+    .kw{color:#a78bfa}.str{color:#86efac}.cm{color:#475569;font-style:italic}
+    .fn{color:#93c5fd}.nu{color:#fb923c}.an{color:#fbbf24}
+    .jkey{color:#f87171}.jval{color:#34d399}.jstr{color:#86efac}
+
+    /* ── FLOW DIAGRAM ── */
+    .flow-row{display:flex;align-items:stretch;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin:16px 0}
+    .flow-node{flex:1;padding:14px 10px;text-align:center;border-right:1px solid var(--border);min-width:100px}
+    .flow-node:last-child{border-right:none}
+    .fn-java{background:rgba(232,151,107,.05);border-top:2px solid var(--java)}
+    .fn-py{background:rgba(77,166,255,.05);border-top:2px solid var(--python)}
+    .fn-mcp{background:rgba(34,211,238,.05);border-top:2px solid var(--cyan)}
+    .fn-actor{background:rgba(108,143,255,.05);border-top:2px solid var(--accent)}
+    .fn-label{font-size:9px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;margin-bottom:3px}
+    .fn-java .fn-label{color:var(--java)}.fn-py .fn-label{color:var(--python)}.fn-mcp .fn-label{color:var(--cyan)}.fn-actor .fn-label{color:var(--accent)}
+    .fn-name{font-size:12px;font-weight:600;margin-bottom:2px}
+    .fn-sub{font-size:10px;color:var(--dim)}
+
+    /* ── TABLES ── */
+    table{width:100%;border-collapse:collapse;font-size:13px;margin:16px 0}
+    th,td{padding:11px 16px;border:1px solid var(--border);text-align:left;vertical-align:top}
+    th{background:var(--s2);color:var(--text);font-weight:600;font-size:12px}
+    td{color:var(--muted)}
+    .ok{color:var(--green);font-weight:600}.warn{color:var(--amber);font-weight:600}.bad{color:var(--red);font-weight:600}
+
+    /* ── TASK TABS ── */
+    .task-nav{display:flex;border-bottom:1px solid var(--border);background:var(--s1);overflow-x:auto;border-radius:14px 14px 0 0}
+    .t-btn{padding:14px 22px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;border-right:1px solid var(--border);border-bottom:3px solid transparent;white-space:nowrap;transition:all .15s;background:none;font-family:'Inter',sans-serif}
+    .t-btn:hover{color:var(--text);background:var(--s2)}
+    .t-btn.active{color:var(--accent);border-bottom-color:var(--accent);background:var(--bg)}
+    .task-body{display:none;background:var(--bg);border:1px solid var(--border);border-top:none;border-radius:0 0 14px 14px;padding:32px 36px}
+    .task-body.show{display:block}
+    .task-title{font-size:22px;font-weight:800;margin-bottom:6px}
+    .task-sub{font-size:14px;color:var(--muted);margin-bottom:24px}
+
+    /* ── CONCEPT PAIR ── */
+    .concept-row{display:grid;grid-template-columns:1fr 1fr;gap:0;background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:20px 0}
+    .cp-pane{padding:24px 28px}
+    .cp-pane+.cp-pane{border-left:1px solid var(--border);background:rgba(255,255,255,.01)}
+    .cp-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--dim);margin-bottom:12px}
+
+    /* ── BFSI BOX ── */
+    .bfsi{background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.18);border-left:3px solid var(--cyan);border-radius:8px;padding:16px 18px;margin:14px 0}
+    .bfsi-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+    .bfsi p{font-size:13px;color:var(--muted);margin:0}
+
+    /* ── OUTCOME CARDS ── */
+    .outcome-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px;margin:20px 0}
+    .outcome-card{background:var(--s2);border:1px solid var(--border);border-radius:12px;padding:20px}
+    .outcome-icon{font-size:24px;margin-bottom:10px}
+    .outcome-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:6px}
+    .outcome-desc{font-size:12px;color:var(--dim);line-height:1.6}
+
+    /* ── AGENDA TIMELINE ── */
+    .agenda-card{background:var(--s1);border:1px solid var(--border);border-radius:14px;padding:24px 28px;margin:16px 0}
+    .agenda-item{display:grid;grid-template-columns:140px 1fr;gap:20px;padding:14px 0;border-bottom:1px solid rgba(42,48,80,.6)}
+    .agenda-item:last-child{border-bottom:none;padding-bottom:0}
+    .agenda-time{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);font-weight:600;padding-top:2px}
+    .agenda-topic{font-size:14px;font-weight:600;color:var(--text);margin-bottom:4px}
+    .agenda-desc{font-size:13px;color:var(--muted);margin:0}
+
+    /* ── ACTIVITY GRID & Q-CARDS ── */
+    .activity-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:20px 0}
+    .q-card{background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color .2s}
+    .q-card:hover{border-color:rgba(108,143,255,.4)}
+    .q-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:10px}
+    .q-num{background:rgba(108,143,255,.12);color:var(--accent);border:1px solid rgba(108,143,255,.3);font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;white-space:nowrap}
+    .q-title{font-size:14px;font-weight:600;color:var(--text);line-height:1.4}
+    .q-body{font-size:13px;color:var(--muted);margin-bottom:14px}
+    .q-reveal-btn{background:var(--s2);border:1px solid var(--border);color:var(--accent);font-size:11px;font-weight:600;padding:6px 14px;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;font-family:'Inter',sans-serif;transition:all .15s}
+    .q-reveal-btn:hover{background:rgba(108,143,255,.1);border-color:var(--accent)}
+    .q-answer{display:none;margin-top:12px;padding:14px 16px;background:rgba(34,211,238,.04);border:1px solid rgba(34,211,238,.2);border-radius:8px;font-size:12.5px;color:#cbd5e1;line-height:1.65}
+    .q-answer.show{display:block}
+    .q-answer strong{color:var(--cyan)}
+
+    /* ── PROGRESSION TIMELINE ── */
+    .progression-wrap{display:flex;flex-direction:column;gap:14px;margin:20px 0}
+    .prog-step{display:grid;grid-template-columns:110px 1fr;gap:20px;background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:18px 22px}
+    .prog-badge{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;padding:4px 10px;border-radius:6px;height:fit-content;text-align:center}
+    .pb-done{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.3)}
+    .pb-now{background:rgba(251,191,36,.12);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+    .pb-next{background:rgba(167,139,250,.1);color:var(--purple);border:1px solid rgba(167,139,250,.3)}
+
+    /* ── FOOTER ── */
+    footer{border-top:1px solid var(--border);padding:28px 48px;text-align:center;font-size:12px;color:var(--dim);background:var(--s1)}
+
+    @media(max-width:960px){
+      nav,.hero,.wrap,footer{padding-left:18px;padding-right:18px}
+      .g2,.g3,.concept-row,.activity-grid,.outcome-grid{grid-template-columns:1fr}
+      .cp-pane+.cp-pane{border-left:none;border-top:1px solid var(--border)}
+      .agenda-item{grid-template-columns:1fr;gap:6px}
+      .hero h1{font-size:28px}
+      .day-selector-wrap{margin:8px 0}
+    }
+  </style>
+</head>
+<body>
+
+<!-- ── STICKY NAV WITH DAY SWITCHER ── -->
+<nav>
+  <div class="nav-logo">
+    <span>Module 4.5</span>
+    <span class="nav-badge" id="nav-day-badge">DAY 1 ACTIVE</span>
+  </div>
+
+  <!-- Day 1 / Day 2 Master Switcher -->
+  <div class="day-selector-wrap">
+    <button class="day-pill-btn active" id="btn-day1" onclick="switchDay(1)">
+      <span class="day-pill-tag">Day 1</span>
+      <span>5 Nov · Architecture &amp; Specialists</span>
+    </button>
+    <button class="day-pill-btn d2" id="btn-day2" onclick="switchDay(2)">
+      <span class="day-pill-tag">Day 2</span>
+      <span>6 Nov · Integration &amp; CAP</span>
+    </button>
+  </div>
+
+  <div class="nav-divider"></div>
+
+  <!-- Day 1 Anchor Links -->
+  <div id="nav-day1-links" class="nav-links-wrap">
+    <a href="#overview">Overview</a>
+    <a href="#day1-plan">Day 1 Plan</a>
+    <a href="#concepts">4 Concepts</a>
+    <a href="#architecture">Architecture</a>
+    <a href="#day1-tasks">Day 1 Tasks (1–3)</a>
+  </div>
+
+  <!-- Day 2 Anchor Links -->
+  <div id="nav-day2-links" class="nav-links-wrap" style="display:none">
+    <a href="#day2-plan">Day 2 Plan</a>
+    <a href="#day2-tasks">Day 2 Tasks (4–5)</a>
+    <a href="#cap-theorem">CAP Theorem</a>
+    <a href="#activity">Activity (10 Scenarios)</a>
+    <a href="#refresher">Refresher</a>
+  </div>
+</nav>
+
+<!-- ── HERO ── -->
+<div class="hero">
+  <div class="hero-label" id="hero-day-badge">Lab 4.5 · Day 1 of 2 · 5 November 2026 · 2 Hours</div>
+  <h1 id="hero-title">AI Gateway &amp; Orchestrator<br><span style="font-weight:400;font-size:26px;color:var(--muted)">Day 1: Bringing the ADR to Life</span></h1>
+  <p class="hero-sub" id="hero-day-sub">
+    Lab 4.2 made the architectural decision: Java owns the ingress gatekeeper, and Python owns which specialist runs.
+    Today in Day 1, that decision becomes running code — an enterprise Java gateway that authenticates, rate-limits,
+    and forwards to a Python FastAPI orchestrator routing three specialist agents.
+  </p>
+  <div class="hero-flow">
+    <div class="hf-step done">✅ Lab 4.1 — Capacity Plan</div>
+    <div class="hf-arrow">→</div>
+    <div class="hf-step done">✅ Lab 4.2 — ADR</div>
+    <div class="hf-arrow">→</div>
+    <div class="hf-step done">✅ Lab 4.3 — Banking APIs</div>
+    <div class="hf-arrow">→</div>
+    <div class="hf-step done">✅ Lab 4.4 — MCP Server</div>
+    <div class="hf-arrow">→</div>
+    <div class="hf-step now" id="flow-current-step">⚙️ Lab 4.5 Day 1 — Gateway &amp; Specialists (Today)</div>
+  </div>
+  <div class="hero-chips" id="hero-chips-wrap">
+    <span class="chip blue">Java 17 · Spring Boot 3.4 (Port 8080)</span>
+    <span class="chip cyan">Python 3.11 · FastAPI (Port 8090)</span>
+    <span class="chip green">MCP JSON-RPC Tool Bus</span>
+    <span class="chip amber">No LLM · Tasks 1, 2, 3</span>
+    <span class="chip purple">2 Languages · 2 Processes</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     DAY 1 CONTAINER — ONLY DISPLAYED WHEN DAY 1 IS ACTIVE
+══════════════════════════════════════════════════════════════════════════════ -->
+<div id="view-day1" class="day-view">
+
+  <!-- ── OVERVIEW ── -->
+  <div class="section" id="overview">
+    <div class="sec-lbl">Architecture Blueprint</div>
+    <h2>Why Lab 4.5 Exists: The Two-Tier System</h2>
+    <p>
+      In an enterprise financial institution, an AI copilot cannot simply expose a Python web server directly to corporate users.
+      Enterprise banking policies demand enterprise ingress security: single regulated entry point, cryptographic bearer token
+      verification, per-user sliding window rate limiting, global concurrency controls, and high-availability error masking.
+    </p>
+    <p>
+      Lab 4.5 builds the complete two-tier system chosen in our Lab 4.2 Architecture Decision Record (ADR):
+      a <strong>Java Spring Boot AI Gateway</strong> (port 8080) that serves as the hardened enterprise gatekeeper,
+      and a <strong>Python FastAPI Orchestrator</strong> (port 8090) that deterministically routes customer prompts
+      to three specialist agents (Policy, Transaction, and Eligibility) without direct external exposure.
+    </p>
+
+    <div class="outcome-grid">
+      <div class="outcome-card">
+        <div class="outcome-icon">🛡️</div>
+        <div class="outcome-title">Java Gateway (Port 8080)</div>
+        <div class="outcome-desc">Single regulated entry point. Enforces Bearer authentication, OWASP input validation, token bucket rate limiting (429), and proxy forwarding with HTTP 503 circuit breaking.</div>
+      </div>
+      <div class="outcome-card">
+        <div class="outcome-icon">🧭</div>
+        <div class="outcome-title">Python Orchestrator (Port 8090)</div>
+        <div class="outcome-desc">Pure routing brain. Evaluates incoming prompts using strict keyword precedence (Eligibility &gt; Transaction &gt; Policy) and dispatches to isolated specialist agents.</div>
+      </div>
+      <div class="outcome-card">
+        <div class="outcome-icon">🔌</div>
+        <div class="outcome-title">Internal MCP Tool Bus</div>
+        <div class="outcome-desc">Specialists invoke Java banking tools over HTTP JSON-RPC at <code>POST /mcp</code> (searchPolicies, getRecentTransactions, getCustomerProfile) to assemble grounded answers.</div>
+      </div>
+    </div>
+
+    <div class="callout cb-amber">
+      <div class="callout-lbl">Notice — No LLM Call in This Lab</div>
+      <p>
+        Lab 4.5 intentionally contains no large language model invocations. In enterprise engineering,
+        the integration plumbing, transport resilience, auth boundaries, deterministic routing, and protocol contracts
+        must be verified independently before introducing non-deterministic model generation.
+        Module 5 will plug the LLM into these exact specialist handlers.
+      </p>
+    </div>
+  </div>
+
+  <!-- ── DAY 1 PLAN ── -->
+  <div class="section" id="day1-plan">
+    <div class="sec-lbl">Schedule &amp; Milestones</div>
+    <h2>Day 1 Workshop Plan (5 November 2026 · 2 Hours)</h2>
+    <p>
+      Day 1 focuses on foundational architecture, core concepts, the Java Gateway proxy implementation,
+      the Python routing logic, and the three specialist agents.
+    </p>
+
+    <div class="agenda-card">
+      <div class="agenda-item">
+        <div class="agenda-time">0:00 – 0:10</div>
+        <div>
+          <div class="agenda-topic">Welcome &amp; Module 4 Recap</div>
+          <p class="agenda-desc">Revisit Labs 4.1–4.4; establish how Lab 4.2's ADR is realized today; inspect project structure.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">0:10 – 0:35</div>
+        <div>
+          <div class="agenda-topic">Core Architecture Concepts</div>
+          <p class="agenda-desc">Deep dive into Gateway pattern, Proxy forwarding, 503 exception mapping, keyword priority, and specialist agents.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">0:35 – 1:10</div>
+        <div>
+          <div class="agenda-topic">Tasks 2–4: Java Gateway (Auth + QueryGateway + HttpOrchestratorClient)</div>
+          <p class="agenda-desc">Implement Spring RestClient POST to orchestrator URL, catch ResourceAccessException and RestClientException, map to HTTP 503.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">1:10 – 1:35</div>
+        <div>
+          <div class="agenda-topic">Task 2: Deterministic Routing (Python)</div>
+          <p class="agenda-desc">Implement <code>route()</code> in <code>app.py</code>; establish keyword priority order where Eligibility supersedes Transaction, defaulting to Policy.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">1:35 – 1:50</div>
+        <div>
+          <div class="agenda-topic">Task 3: Specialist Agents (Python)</div>
+          <p class="agenda-desc">Implement Policy, Transaction, and Eligibility specialists in <code>agents.py</code>; wire JSON-RPC tool calls to Java MCP endpoint.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">1:50 – 2:00</div>
+        <div>
+          <div class="agenda-topic">Day 1 Wrap-up &amp; State Check</div>
+          <p class="agenda-desc">Verify unit test suites (Java &amp; Python); review Day 1 accomplishments; preview Day 2 multi-process integration.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONCEPTS ── -->
+  <div class="section" id="concepts">
+    <div class="sec-lbl">Core Theory</div>
+    <h2>4 Concepts That Underpin This Architecture</h2>
+
+    <!-- CONCEPT 1 -->
+    <div class="concept-row">
+      <div class="cp-pane">
+        <div class="cp-label">Concept 1 of 4</div>
+        <h3 style="margin-top:0; color:var(--accent)">🛡️ Gateway Pattern — Java as the Gatekeeper</h3>
+        <p>
+          The <strong>API Gateway Pattern</strong> establishes a single, strongly governed entry point
+          for all client communications. Cross-cutting concerns—authentication, token validation,
+          OWASP input sanitization, rate limiting, and admission control—are completely enforced
+          <strong>before</strong> a request reaches core business routing.
+        </p>
+        <p>
+          In this system, relationship managers (RMs) connect exclusively to the Java Gateway at
+          <code>http://localhost:8080/v1/copilot/query</code>. The Python orchestrator has no public exposure;
+          it runs as an internal microservice. If a request lacks a valid Bearer token, it is immediately
+          terminated with an HTTP 401. The Python process never expends CPU cycles or logs unauthenticated traffic.
+        </p>
+      </div>
+      <div class="cp-pane">
+        <div class="cp-label">BFSI Real-World Equivalent</div>
+        <div class="bfsi">
+          <div class="bfsi-lbl">🏦 RBI &amp; NPCI Unified Payments Interface (UPI) Gateway</div>
+          <p>
+            Every UPI transaction initiated across PhonePe, Google Pay, or Paytm does not connect directly
+            to the beneficiary bank's core accounting system. All requests first hit NPCI's central gateway.
+            NPCI performs cryptographic device fingerprinting, biometric/PIN pre-validation, and fair-use rate limiting.
+          </p>
+          <p style="margin-top:10px">
+            Only clean, authorized requests are forwarded to the individual bank's Core Banking Solution (CBS).
+            Our Java Spring Boot gateway serves the exact same role as NPCI: guarding the downstream specialized services.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPT 2 -->
+    <div class="concept-row">
+      <div class="cp-pane">
+        <div class="cp-label">Concept 2 of 4</div>
+        <h3 style="margin-top:0; color:var(--green)">⚡ Proxy &amp; 503 Failure Mapping</h3>
+        <p>
+          When microservices communicate across process boundaries, network partitions and service outages are inevitable.
+          The <strong>Proxy Pattern</strong> encapsulates communication with remote downstream services.
+        </p>
+        <p>
+          Inside <code>QueryGateway.handle()</code>, the gateway validates, admits, and routes through <code>HttpOrchestratorClient</code> to
+          the Python orchestrator. If the Python process is crashed, restarting, or partitioned, the Java network stack
+          throws a <code>ResourceAccessException</code> (e.g., Connection Refused).
+        </p>
+        <p>
+          Rather than leaking raw socket traces or generic 500 errors to the RM, the gateway intercepts these exceptions
+          and translates them into a domain-specific <code>OrchestratorUnavailableException</code>, returning a clean,
+          standardized HTTP 503: <code>{"error":"orchestrator unavailable"}</code>.
+        </p>
+      </div>
+      <div class="cp-pane">
+        <div class="cp-label">BFSI Real-World Equivalent</div>
+        <div class="bfsi">
+          <div class="bfsi-lbl">🏧 ATM Hardware Terminal Failure Masking</div>
+          <p>
+            When you insert a debit card into an ATM, the ATM's front-end controller communicates with the bank's
+            interbank switch. If the remote switch or telecommunication line is down, the ATM screen displays:
+            <em>"Service Temporarily Unavailable — Please try again later."</em>
+          </p>
+          <p style="margin-top:10px">
+            The ATM never displays a raw C++ memory fault or Java socket stack trace on the terminal screen.
+            Mapping <code>ResourceAccessException &rarr; HTTP 503</code> provides the exact same institutional resilience
+            and operational security.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPT 3 -->
+    <div class="concept-row">
+      <div class="cp-pane">
+        <div class="cp-label">Concept 3 of 4</div>
+        <h3 style="margin-top:0; color:var(--amber)">🎯 Keyword Routing — The Orchestrator's Job</h3>
+        <p>
+          The Python orchestrator acts as a deterministic dispatcher. In contrast to monolithic LLM routing
+          (which incurs latency, token costs, and hallucinations), production banking workflows use strict,
+          deterministic routing trees for regulated operations.
+        </p>
+        <p>
+          The routing function lowercases the prompt and applies a rigid priority hierarchy:
+        </p>
+        <table>
+          <tr><th>Priority</th><th>Specialist</th><th>Trigger Words</th></tr>
+          <tr><td><strong>1 (Highest)</strong></td><td><code>eligibility</code></td><td>eligible, eligibility, loan, bureau, top-up, topup</td></tr>
+          <tr><td><strong>2 (Medium)</strong></td><td><code>transaction</code></td><td>transaction, transactions, history, recent, last</td></tr>
+          <tr><td><strong>3 (Default)</strong></td><td><code>policy</code></td><td>All other banking queries (fees, charges, guidelines, greetings)</td></tr>
+        </table>
+        <p>
+          Notice that "loan" belongs to <code>ELIGIBILITY_WORDS</code>. If an RM asks "What is the loan transaction fee?",
+          eligibility rules trigger first, ensuring credit underwriting checks take precedence.
+        </p>
+      </div>
+      <div class="cp-pane">
+        <div class="cp-label">BFSI Real-World Equivalent</div>
+        <div class="bfsi">
+          <div class="bfsi-lbl">🏢 Bank Branch Helpdesk &amp; Specialist Desks</div>
+          <p>
+            When a customer enters a retail bank branch, the front reception desk (Orchestrator) listens to their intent.
+            If the customer says <em>"I want to check if I can get a top-up loan"</em>, they are directed immediately to the
+            <strong>Credit Underwriting Desk</strong> (Eligibility).
+          </p>
+          <p style="margin-top:10px">
+            If they say <em>"Print my last 5 debit transactions"</em>, they are sent to the <strong>Teller Counter</strong> (Transaction).
+            If they ask <em>"What is your RTGS remittance charge?"</em>, they receive the <strong>Schedule of Charges</strong> (Policy).
+            The receptionist does not answer; they direct the customer to the certified specialist.
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONCEPT 4 -->
+    <div class="concept-row">
+      <div class="cp-pane">
+        <div class="cp-label">Concept 4 of 4</div>
+        <h3 style="margin-top:0; color:var(--purple)">🧩 Specialist Agents — Each Calls One MCP Tool</h3>
+        <p>
+          In micro-agent architecture, each agent possesses a single, tightly constrained responsibility.
+          Specialists in <code>agents.py</code> do not maintain conversational memory or call arbitrary endpoints.
+          Each specialist connects to exactly one governed MCP tool over HTTP JSON-RPC at <code>POST /mcp</code>:
+        </p>
+        <ul>
+          <li><strong>Policy Specialist</strong>: Calls <code>searchPolicies</code> with the prompt query. Extracts policy excerpt.</li>
+          <li><strong>Transaction Specialist</strong>: Calls <code>getRecentTransactions</code> with <code>customerId</code> and <code>size: 5</code>. Formats date, description, and amount.</li>
+          <li><strong>Eligibility Specialist</strong>: Calls <code>getCustomerProfile</code> with <code>customerId</code>. Reads bureau score; verifies score &ge; 700 threshold.</li>
+        </ul>
+        <p>
+          Every specialist returns an identical, standardized contract:
+          <code>{"agent": str, "answer": str, "customerId": str}</code>.
+        </p>
+      </div>
+      <div class="cp-pane">
+        <div class="cp-label">BFSI Real-World Equivalent</div>
+        <div class="bfsi">
+          <div class="bfsi-lbl">🏛️ Core Banking Domain Subsystems</div>
+          <p>
+            Inside a tier-1 bank, no single departmental officer has omnipotent access across all core systems:
+          </p>
+          <ul style="margin-top:8px">
+            <li><strong>Loan Officer (Eligibility Agent)</strong> queries CIBIL/Experian credit score APIs via the loan origination system.</li>
+            <li><strong>Teller (Transaction Agent)</strong> queries the ledger database via the Finacle/Flexcube transaction engine.</li>
+            <li><strong>Product Manager (Policy Agent)</strong> queries the regulatory document repository.</li>
+          </ul>
+          <p style="margin-top:10px">
+            Each specialist agent respects the boundary of its underlying subsystem, interacting purely via standardized tools.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ARCHITECTURE ── -->
+  <div class="section" id="architecture">
+    <div class="sec-lbl">System Topology</div>
+    <h2>Full End-to-End Request Pipeline</h2>
+    <p>
+      The complete system integrates two distinct runtimes: a Java 17 JVM hosting the gateway and banking tools,
+      and a Python 3.11 process hosting the FastAPI routing orchestrator.
+    </p>
+
+    <div class="flow-row">
+      <div class="flow-node fn-actor">
+        <div class="fn-label">Client</div>
+        <div class="fn-name">RM Client</div>
+        <div class="fn-sub">Bearer lab-token</div>
+      </div>
+      <div class="flow-node fn-java">
+        <div class="fn-label">Java :8080</div>
+        <div class="fn-name">CopilotController</div>
+        <div class="fn-sub">Auth (401) &amp; Rate (429)</div>
+      </div>
+      <div class="flow-node fn-java">
+        <div class="fn-label">Java :8080</div>
+        <div class="fn-name">QueryGateway</div>
+        <div class="fn-sub">Forward &amp; Map 503</div>
+      </div>
+      <div class="flow-node fn-py">
+        <div class="fn-label">Python :8090</div>
+        <div class="fn-name">FastAPI /v1/route</div>
+        <div class="fn-sub">Keyword Dispatcher</div>
+      </div>
+      <div class="flow-node fn-py">
+        <div class="fn-label">Python :8090</div>
+        <div class="fn-name">Specialists</div>
+        <div class="fn-sub">policy | txn | elig</div>
+      </div>
+      <div class="flow-node fn-mcp">
+        <div class="fn-label">Java :8080 (Internal)</div>
+        <div class="fn-name">POST /mcp</div>
+        <div class="fn-sub">JSON-RPC Tool Bus</div>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:24px">
+      <div class="card">
+        <div class="card-head blue">What Java Handles (Port 8080)</div>
+        <div class="card-body">
+          <ul>
+            <li><strong>Bearer Authentication</strong>: Intercepts <code>Authorization: Bearer lab-token</code>. Missing or invalid token halts immediately with HTTP 401.</li>
+            <li><strong>Admission Control &amp; Rate Limiting</strong>: Tracks per-RM token buckets (10 req/min) returning HTTP 429 with <code>Retry-After: 60</code>. Global shed returns <code>Retry-After: 1</code>.</li>
+            <li><strong>Request Validation</strong>: Validates <code>customerId</code> and <code>prompt</code> are non-blank (HTTP 400). <code>X-RM-Id</code> is a header, validated in <code>GatewayAuthFilter</code>.</li>
+            <li><strong>Proxy Dispatch</strong>: Serializes clean request to Python orchestrator; traps network faults and surfaces HTTP 503.</li>
+            <li><strong>MCP Tool Host</strong>: Hosts <code>searchPolicies</code>, <code>getRecentTransactions</code>, and <code>getCustomerProfile</code> on internal <code>POST /mcp</code>.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head cyan">What Python Handles (Port 8090)</div>
+        <div class="card-body">
+          <ul>
+            <li><strong>Zero Auth Overhead</strong>: Trusts the internal boundary. Operates purely on pre-authenticated payloads forwarded from Java.</li>
+            <li><strong>Keyword Routing</strong>: Evaluates lowercased prompt against <code>ELIGIBILITY_WORDS</code>, then <code>TRANSACTION_WORDS</code>, falling back to <code>policy</code>.</li>
+            <li><strong>Specialist Dispatch</strong>: Hands query execution to the appropriate domain function.</li>
+            <li><strong>HTTP JSON-RPC Tool Invocation</strong>: Calls <code>mcp_tools.py</code> to communicate back to Java's <code>/mcp</code> endpoint.</li>
+            <li><strong>Response Synthesis</strong>: Formats raw tool JSON into human-readable answers (extracting policy excerpts, transaction strings, and bureau scores).</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="callout cb-red" style="margin-top:20px">
+      <div class="callout-lbl">Security Boundary &amp; Lab Simplifications</div>
+      <p>
+        In this workshop deployment, two deliberate simplifications exist:
+      </p>
+      <ul style="margin-top:8px">
+        <li><strong>Hardcoded Token</strong>: The Bearer token is <code>"lab-token"</code>. In production, this would be an RS256 JWT signed by an enterprise Identity Provider (e.g., Keycloak, Okta, Azure AD) with claims validated against RM entitlements.</li>
+        <li><strong>Unauthenticated Internal /mcp</strong>: The <code>POST /mcp</code> endpoint does not require a Bearer token. It serves as an internal tool bus designed solely for the trusted Python orchestrator process on the internal loopback network. External clients cannot route to <code>/mcp</code> directly.</li>
+      </ul>
+    </div>
+
+    <div class="card" style="margin-top:20px">
+      <div class="card-head green">Primary Test Customer Record</div>
+      <div class="card-body">
+        <div class="g3">
+          <div>
+            <div style="font-size:11px;color:var(--dim);text-transform:uppercase;font-weight:700">Customer ID &amp; Name</div>
+            <div style="font-size:15px;font-weight:600;color:var(--text);margin-top:4px">10428 — Asha Raman</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--dim);text-transform:uppercase;font-weight:700">Bureau Credit Score</div>
+            <div style="font-size:15px;font-weight:600;color:var(--green);margin-top:4px">742 (Eligible &ge; 700)</div>
+          </div>
+          <div>
+            <div style="font-size:11px;color:var(--dim);text-transform:uppercase;font-weight:700">Newest Transaction</div>
+            <div style="font-size:15px;font-weight:600;color:var(--accent);margin-top:4px">220.00 DEBIT · GROCERY</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAY 1 TASKS ── -->
+  <div class="section" id="day1-tasks">
+    <div class="sec-lbl">Hands-on Implementation</div>
+    <h2>Day 1 Tasks — Gateway &amp; Orchestrator Setup</h2>
+    <p>
+      Complete Tasks 1, 2, and 3 during Day 1. The test suites in Java and Python serve as your precise answer keys.
+    </p>
+
+    <div style="margin-top:24px">
+      <div class="task-nav">
+        <button class="t-btn active" onclick="showDay1Task(0)">Tasks 2&#x2013;4 &#x2715; Java Gateway Layer</button>
+        <button class="t-btn" onclick="showDay1Task(1)">Task 2 · route() in app.py (Python)</button>
+        <button class="t-btn" onclick="showDay1Task(2)">Task 3 · agents.py Specialists (Python)</button>
+      </div>
+
+      <!-- TASK 1 -->
+      <div class="task-body show" id="d1t0">
+        <div class="task-title">Tasks 2&#x2013;4: GatewayAuthFilter &middot; QueryGateway &middot; HttpOrchestratorClient (Java)</div>
+        <div class="task-sub">File: <code>src/main/java/com/meridian/lab45/security/GatewayAuthFilter.java | gateway/QueryGateway.java | orchestrator/HttpOrchestratorClient.java</code> · Test: <code>mvn -Dtest=GatewayAuthHttpTest,QueryGatewayTest,QueryHttpTest,HttpOrchestratorClientTest test</code></div>
+
+        <p>
+          The gateway receives an authenticated <code>QueryRequest</code> and must forward it to the Python orchestrator
+          using Spring Boot's modern fluent <code>RestClient</code>.
+        </p>
+
+        <h4>Implementation Requirements</h4>
+        <ul>
+          <li>Execute an HTTP POST to <code>orchestratorUrl</code> with <code>MediaType.APPLICATION_JSON</code> content type.</li>
+          <li>Transmit <code>request</code> in the HTTP body.</li>
+          <li>Retrieve and deserialize the response into an <code>OrchestratorReply</code>.</li>
+          <li>If the reply or body is <code>null</code>, throw <code>OrchestratorUnavailableException</code>.</li>
+          <li>Catch <code>ResourceAccessException</code> (e.g. connection refused when Python is offline) and throw <code>new OrchestratorUnavailableException(ex)</code>.</li>
+          <li>Catch <code>RestClientException</code> (HTTP client errors) and throw <code>new OrchestratorUnavailableException(ex)</code>.</li>
+        </ul>
+
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">src/main/java/com/meridian/lab45/security/GatewayAuthFilter.java | gateway/QueryGateway.java | orchestrator/HttpOrchestratorClient.java</span>
+            <span class="code-tag tag-java">JAVA</span>
+          </div>
+          <pre class="code"><span class="kw">package</span> com.meridian.lab45.gateway;
+
+<span class="kw">import</span> com.meridian.lab43.LabProperties;
+<span class="kw">import</span> com.meridian.lab45.model.OrchestratorReply;
+<span class="kw">import</span> com.meridian.lab45.model.QueryRequest;
+<span class="kw">import</span> org.springframework.http.MediaType;
+<span class="kw">import</span> org.springframework.stereotype.Service;
+<span class="kw">import</span> org.springframework.web.client.ResourceAccessException;
+<span class="kw">import</span> org.springframework.web.client.RestClient;
+<span class="kw">import</span> org.springframework.web.client.RestClientException;
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> GatewayAuthFilter <span class="kw">extends</span> OncePerRequestFilter {
+    <span class="kw">private final</span> RestClient http;
+    <span class="kw">private final</span> String orchestratorUrl;
+
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(HttpServletRequest request, HttpServletResponse response, FilterChain chain) <span class="kw">throws</span> IOException {
+        <span class="kw">this</span>.http = restClient;
+        <span class="kw">this</span>.orchestratorUrl = properties.orchestratorUrl();
+    }
+
+    <span class="kw">public</span> OrchestratorReply <span class="fn">forward</span>(QueryRequest request) {
+        <span class="kw">try</span> {
+            OrchestratorReply reply = http.<span class="fn">post</span>()
+                    .<span class="fn">uri</span>(orchestratorUrl)
+                    .<span class="fn">contentType</span>(MediaType.APPLICATION_JSON)
+                    .<span class="fn">body</span>(request)
+                    .<span class="fn">retrieve</span>()
+                    .<span class="fn">body</span>(OrchestratorReply.class);
+            <span class="kw">if</span> (reply == <span class="kw">null</span>) {
+                <span class="kw">throw new</span> OrchestratorUnavailableException(
+                    <span class="kw">new</span> IllegalStateException(<span class="str">"empty orchestrator body"</span>));
+            }
+            <span class="kw">return</span> reply;
+        } <span class="kw">catch</span> (ResourceAccessException ex) {
+            <span class="kw">throw new</span> OrchestratorUnavailableException(ex);
+        } <span class="kw">catch</span> (RestClientException ex) {
+            <span class="kw">throw new</span> OrchestratorUnavailableException(ex);
+        }
+    }
+}</pre>
+        </div>
+
+        <div class="bfsi">
+          <div class="bfsi-lbl">🏦 BFSI Architectural Note — Upstream Exception Isolation</div>
+          <p>
+            In banking switch architectures, client-facing gateways must isolate backend service failures.
+            If the Python orchestrator crashes, wrapping <code>ResourceAccessException</code> into <code>OrchestratorUnavailableException</code>
+            ensures the controller surfaces a clean, audit-compliant HTTP 503 rather than an unhandled 500 error that triggers P1 infrastructure alerts.
+          </p>
+        </div>
+
+        <div class="callout cb-red">
+          <div class="callout-lbl">Security Warning — Order of Filters</div>
+          <p>
+            The HTTP 401 authentication check is performed in <code>GatewayAuthFilter.doFilterInternal()</code> <em>before</em> <code>QueryGateway.handle()</code>
+            is reached. Never attempt to catch authentication exceptions inside <code>forward()</code> or return a fallback payload.
+            Unauthenticated requests must never execute network I/O.
+          </p>
+        </div>
+
+        <div class="callout cb-green">
+          <div class="callout-lbl">✅ Task 1 Complete When</div>
+          <p>
+            Executing <code>mvn -Dtest=GatewayAuthHttpTest,QueryGatewayTest,QueryHttpTest,HttpOrchestratorClientTest test</code> produces <strong>BUILD SUCCESS</strong>.<br>
+            Verification: Missing Bearer returns 401; Python process offline returns 503 <code>{"error":"orchestrator unavailable"}</code>; valid token with mock backend returns 200.
+          </p>
+        </div>
+      </div>
+
+      <!-- TASK 2 -->
+      <div class="task-body" id="d1t1">
+        <div class="task-title">Task 2 · route() in app.py — Deterministic Routing (25 min)</div>
+        <div class="task-sub">File: <code>python-orchestrator/orchestrator/router.py</code> · Test: <code>cd python-orchestrator &amp;&amp; pytest tests/test_router.py -q</code></div>
+
+        <p>
+          The orchestrator maps natural language prompts from relationship managers to domain specialists
+          using strict keyword precedence rules.
+        </p>
+
+        <h4>Routing Rules</h4>
+        <ul>
+          <li>Evaluate prompt in lowercase: <code>text = (prompt or "").lower()</code>.</li>
+          <li>If any word in <code>ELIGIBILITY_WORDS</code> is present, return <code>"eligibility"</code> immediately.</li>
+          <li>If any word in <code>TRANSACTION_WORDS</code> is present, return <code>"transaction"</code>.</li>
+          <li>Otherwise, default to <code>"policy"</code> (handles fee queries, general FAQs, and greetings).</li>
+        </ul>
+
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">python-orchestrator/orchestrator/router.py</span>
+            <span class="code-tag tag-py">PYTHON</span>
+          </div>
+          <pre class="code"><span class="kw">from</span> fastapi <span class="kw">import</span> FastAPI
+<span class="kw">from</span> pydantic <span class="kw">import</span> BaseModel
+<span class="kw">from</span> agents <span class="kw">import</span> eligibility, policy, transaction
+
+app = FastAPI(title=<span class="str">"Orchestrator"</span>)
+
+ELIGIBILITY_WORDS = (<span class="str">"eligible"</span>, <span class="str">"eligibility"</span>, <span class="str">"loan"</span>, <span class="str">"bureau"</span>, <span class="str">"top-up"</span>, <span class="str">"topup"</span>)
+TRANSACTION_WORDS = (<span class="str">"transaction"</span>, <span class="str">"transactions"</span>, <span class="str">"history"</span>, <span class="str">"recent"</span>, <span class="str">"last"</span>)
+
+
+<span class="kw">def</span> <span class="fn">route</span>(prompt: str) -&gt; str:
+    text = (prompt <span class="kw">or</span> <span class="str">""</span>).lower()
+    <span class="kw">if</span> any(word <span class="kw">in</span> text <span class="kw">for</span> word <span class="kw">in</span> ELIGIBILITY_WORDS):
+        <span class="kw">return</span> <span class="str">"eligibility"</span>
+    <span class="kw">if</span> any(word <span class="kw">in</span> text <span class="kw">for</span> word <span class="kw">in</span> TRANSACTION_WORDS):
+        <span class="kw">return</span> <span class="str">"transaction"</span>
+    <span class="kw">return</span> <span class="str">"policy"</span>
+
+
+<span class="kw">class</span> Query(BaseModel):
+    <span class="cm"># X-RM-Id comes from the request header, not the body</span>
+    customerId: str = <span class="str">""</span>
+    prompt: str = <span class="str">""</span>
+
+
+<span class="an">@app.post</span>(<span class="str">"/v1/route"</span>)
+<span class="kw">def</span> <span class="fn">handle</span>(query: Query) -&gt; dict:
+    agent = route(query.prompt)
+    <span class="kw">if</span> agent == <span class="str">"eligibility"</span>:
+        <span class="kw">return</span> eligibility(query.customerId, query.prompt)
+    <span class="kw">if</span> agent == <span class="str">"transaction"</span>:
+        <span class="kw">return</span> transaction(query.customerId, query.prompt)
+    <span class="kw">return</span> policy(query.customerId, query.prompt)</pre>
+        </div>
+
+        <div class="callout cb-blue">
+          <div class="callout-lbl">Why Eligibility Trumps Transaction</div>
+          <p>
+            Consider the prompt: <em>"Can this customer get a loan based on their recent transaction history?"</em><br>
+            This prompt contains both "loan" and "transaction". Evaluating eligibility first ensures the request
+            routes to credit underwriting rather than simply printing statements.
+          </p>
+        </div>
+
+        <div class="callout cb-green">
+          <div class="callout-lbl">✅ Task 2 Complete When</div>
+          <p>
+            Executing <code>cd python-orchestrator &amp;&amp; pytest tests/test_router.py -q</code> passes all 4 test cases:
+            fee questions &rarr; policy; last transactions &rarr; transaction; top-up loan &rarr; eligibility; unknown greeting ("Good morning") &rarr; policy.
+          </p>
+        </div>
+      </div>
+
+      <!-- TASK 3 -->
+      <div class="task-body" id="d1t2">
+        <div class="task-title">Task 3 · agents.py — Implement 3 Specialist Agents (40 min)</div>
+        <div class="task-sub">Files: <code>python-orchestrator/orchestrator/agents/eligibility.py</code>, <code>policy.py</code>, <code>transaction.py</code> · Test: <code>cd python-orchestrator &amp;&amp; pytest tests/test_agents.py -q</code></div>
+
+        <p>
+          Each specialist agent accepts <code>(customer_id, prompt, call=call_tool)</code>, invokes its specific MCP tool,
+          and formats a structured response dictionary.
+        </p>
+
+        <h4>Specialist Specifications</h4>
+        <ul>
+          <li><strong>policy()</strong>: Calls <code>searchPolicies</code> with <code>{"query": prompt}</code>. Returns excerpt in <code>answer</code>.</li>
+          <li><strong>transaction()</strong>: Calls <code>getRecentTransactions</code> with <code>{"customerId": customer_id, "size": 5}</code>. Formats lines containing date/postedOn, description (must include <code>GROCERY</code> for Asha), and amount.</li>
+          <li><strong>eligibility()</strong>: Calls <code>getCustomerProfile</code> with <code>{"customerId": customer_id}</code>. Checks if <code>bureauScore &ge; 700</code>. Formats answer stating eligibility and explicit score (e.g., <code>742</code>).</li>
+          <li><strong>Error Handling</strong>: If <code>result["ok"]</code> is <code>False</code>, return <code>{"agent": &lt;name&gt;, "answer": result["error"], "customerId": customer_id}</code>.</li>
+        </ul>
+
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">python-orchestrator/orchestrator/agents/ — specialists</span>
+            <span class="code-tag tag-py">PYTHON</span>
+          </div>
+          <pre class="code"><span class="str">"""Three specialists. Each calls one Java MCP tool and returns {agent, answer, customerId}."""</span>
+
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+
+<span class="kw">from</span> typing <span class="kw">import</span> Any, Callable
+<span class="kw">from</span> mcp_tools <span class="kw">import</span> call_tool
+
+ToolFn = Callable[[str, dict[str, Any]], dict[str, Any]]
+
+ELIGIBLE_SCORE = <span class="nu">700</span>
+
+
+<span class="kw">def</span> <span class="fn">policy</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"searchPolicies"</span>, {<span class="str">"query"</span>: prompt})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"policy"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    excerpt = (result[<span class="str">"data"</span>] <span class="kw">or</span> {}).get(<span class="str">"excerpt"</span>, <span class="str">"No policy excerpt found."</span>)
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"policy"</span>, <span class="str">"answer"</span>: excerpt, <span class="str">"customerId"</span>: customer_id}
+
+
+<span class="kw">def</span> <span class="fn">transaction</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"getRecentTransactions"</span>, {<span class="str">"customerId"</span>: customer_id, <span class="str">"size"</span>: <span class="nu">5</span>})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"transaction"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    rows = (result[<span class="str">"data"</span>] <span class="kw">or</span> {}).get(<span class="str">"transactions"</span>) <span class="kw">or</span> []
+    parts = [f<span class="str">"{row.get('postedOn', row.get('date', '?'))} {row.get('description')} {row.get('amount')}"</span> <span class="kw">for</span> row <span class="kw">in</span> rows]
+    answer = <span class="str">"Recent transactions: "</span> + <span class="str">"; "</span>.join(parts)
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"transaction"</span>, <span class="str">"answer"</span>: answer, <span class="str">"customerId"</span>: customer_id}
+
+
+<span class="kw">def</span> <span class="fn">eligibility</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"getCustomerProfile"</span>, {<span class="str">"customerId"</span>: customer_id})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"eligibility"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    data = result[<span class="str">"data"</span>] <span class="kw">or</span> {}
+    score = int(data.get(<span class="str">"bureauScore"</span>) <span class="kw">or</span> <span class="nu">0</span>)
+    name = data.get(<span class="str">"customerName"</span>) <span class="kw">or</span> customer_id
+    <span class="kw">if</span> score &gt;= ELIGIBLE_SCORE:
+        answer = f<span class="str">"{name} is eligible for the top-up loan; bureau score {score}."</span>
+    <span class="kw">else</span>:
+        answer = f<span class="str">"{name} is not eligible for the top-up loan; bureau score {score}."</span>
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"eligibility"</span>, <span class="str">"answer"</span>: answer, <span class="str">"customerId"</span>: customer_id}</pre>
+        </div>
+
+        <div class="callout cb-green">
+          <div class="callout-lbl">✅ Task 3 Complete When</div>
+          <p>
+            Executing <code>cd python-orchestrator &amp;&amp; pytest tests/test_agents.py -q</code> passes all tests.<br>
+            Verification: Policy returns <code>250.00</code>; Transaction answer includes <code>GROCERY</code>; Eligibility answer contains <code>742</code> and <code>eligible</code>.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Day 1 Milestone Card / Advance to Day 2 -->
+  <div class="day-milestone-card">
+    <div class="day-milestone-info">
+      <div class="day-milestone-title">🎉 Day 1 Complete — 3 Units Built &amp; Tested</div>
+      <p class="day-milestone-desc">
+        You have implemented the Java Gateway proxy forwarding (Task 1), deterministic keyword routing (Task 2),
+        and the 3 domain specialist agents (Task 3). Tomorrow in Day 2: multi-process live integration, CAP theorem
+        consistency trade-offs, and 10 production architecture review scenarios.
+      </p>
+    </div>
+    <button class="btn-advance" onclick="switchDay(2)">
+      <span>Advance to Day 2 View</span>
+      <span style="font-size:16px">&rarr;</span>
+    </button>
+  </div>
+
+</div><!-- /view-day1 -->
+
+
+<!-- ══════════════════════════════════════════════════════════════════════════════
+     DAY 2 CONTAINER — ONLY DISPLAYED WHEN DAY 2 IS ACTIVE
+══════════════════════════════════════════════════════════════════════════════ -->
+<div id="view-day2" class="day-view" style="display:none">
+
+  <!-- Day 2 Return Bar -->
+  <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-bottom:18px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:12px">
+    <div>
+      <span style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1.5px;color:var(--green)">Day 2 of 2 Active · 6 November 2026</span>
+      <h3 style="margin:2px 0 0;font-size:21px;color:var(--text)">Live Multi-Process Integration, CAP Theorem &amp; Architecture Review</h3>
+    </div>
+    <button class="btn-back" onclick="switchDay(1)">&larr; Return to Day 1 View</button>
+  </div>
+
+  <!-- ── DAY 2 PLAN ── -->
+  <div class="section" id="day2-plan">
+    <div class="sec-lbl">Schedule &amp; Milestones</div>
+    <h2>Day 2 Workshop Plan (6 November 2026 · 2 Hours)</h2>
+    <p>
+      Day 2 integrates both running processes live, tests end-to-end multi-process execution, examines
+      the CAP Theorem in financial systems, conducts interactive architecture reviews, and summarizes
+      the complete Module 4 journey.
+    </p>
+
+    <div class="agenda-card">
+      <div class="agenda-item">
+        <div class="agenda-time">0:00 – 0:10</div>
+        <div>
+          <div class="agenda-topic">Day 2 Opening &amp; Progress Review</div>
+          <p class="agenda-desc">Recap Day 1 accomplishments (Tasks 1–3); confirm readiness for live two-process execution.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">0:10 – 0:30</div>
+        <div>
+          <div class="agenda-topic">Task 4: Multi-Process Live Integration</div>
+          <p class="agenda-desc">Start Python FastAPI and Java Spring Boot; test all 3 specialist queries; verify 401 and 503 resilience.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">0:30 – 0:55</div>
+        <div>
+          <div class="agenda-topic">Task 5 &amp; CAP Theorem Deep Dive</div>
+          <p class="agenda-desc">Implement <code>knowledge.py</code> and complete <code>reviews/CAP_TRADEOFFS.md</code>; analyze AP read models vs CP financial transactions.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">0:55 – 1:20</div>
+        <div>
+          <div class="agenda-topic">Interactive Architecture Activity (10 Scenarios)</div>
+          <p class="agenda-desc">Group discussion analyzing 10 real-world production scenarios displayed on screen.</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">1:20 – 1:45</div>
+        <div>
+          <div class="agenda-topic">Module 4 Retrospective &amp; FDE Journey</div>
+          <p class="agenda-desc">Trace complete data path from Core Banking to RM Client across Labs 4.1–4.5; preview Module 5 (LLM entry).</p>
+        </div>
+      </div>
+      <div class="agenda-item">
+        <div class="agenda-time">1:45 – 2:00</div>
+        <div>
+          <div class="agenda-topic">Q&amp;A &amp; Wrap-up</div>
+          <p class="agenda-desc">Final verification checks; open architectural discussion.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── DAY 2 TASKS ── -->
+  <div class="section" id="day2-tasks">
+    <div class="sec-lbl">Hands-on Implementation</div>
+    <h2>Day 2 Tasks — Integration &amp; CAP Theorem</h2>
+    <p>
+      Execute live two-process multi-agent queries in Task 4, and complete distributed data consistency reasoning in Task 5.
+    </p>
+
+    <div style="margin-top:24px">
+      <div class="task-nav">
+        <button class="t-btn active" onclick="showDay2Task(0)">Task 4 · Multi-Process Integration</button>
+        <button class="t-btn" onclick="showDay2Task(1)">Task 6 &#x2715; CAP Freshness &amp; CAP_TRADEOFFS.md</button>
+      </div>
+
+      <!-- TASK 4 -->
+      <div class="task-body show" id="d2t0">
+        <div class="task-title">Task 4 · Multi-Process Live Integration (20 min)</div>
+        <div class="task-sub">Two Processes · Port 8090 (Python) &amp; Port 8080 (Java)</div>
+
+        <p>
+          Bring both processes alive and issue test queries from a third terminal to prove end-to-end integration.
+        </p>
+
+        <h4>Terminal 1: Start Python Orchestrator</h4>
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">Terminal 1 (PowerShell)</span>
+            <span class="code-tag tag-shell">POWERSHELL</span>
+          </div>
+          <pre class="code">python -m pip install -r orchestrator/requirements.txt
+$env:LAB45_MCP_URL = <span class="str">"http://127.0.0.1:8080/mcp"</span>
+cd python-orchestrator &amp;&amp; python -m orchestrator</pre>
+        </div>
+
+        <h4 style="margin-top:20px">Terminal 2: Start Java AI Gateway</h4>
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">Terminal 2 (PowerShell)</span>
+            <span class="code-tag tag-shell">POWERSHELL</span>
+          </div>
+          <pre class="code">mvn spring-boot:run</pre>
+        </div>
+
+        <h4 style="margin-top:20px">Terminal 3: Issue Test Queries</h4>
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">Terminal 3 (PowerShell) — Test Queries</span>
+            <span class="code-tag tag-shell">POWERSHELL</span>
+          </div>
+          <pre class="code"><span class="cm"># Query 1: Policy (Outward Transfer Fee)</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{customerId":"10428","prompt":"What is the fee for an outward transfer?"}'</span>
+
+<span class="cm"># Query 2: Transaction History</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{customerId":"10428","prompt":"Show the last transactions"}'</span>
+
+<span class="cm"># Query 3: Top-up Loan Eligibility</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{customerId":"10428","prompt":"Is this customer eligible for the top-up loan?"}'</span>
+
+<span class="cm"># Query 4: Missing Bearer Token (Verifies 401 gatekeeper)</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{customerId":"10428","prompt":"test"}'</span></pre>
+        </div>
+
+        <h4 style="margin-top:20px">Expected Results Matrix</h4>
+        <table>
+          <tr><th>Query</th><th>Expected Agent</th><th>Key Content in Answer</th></tr>
+          <tr><td>Query 1 (Fee)</td><td><code>"policy"</code></td><td>Contains <code>250.00</code> policy excerpt</td></tr>
+          <tr><td>Query 2 (Transactions)</td><td><code>"transaction"</code></td><td>Contains <code>GROCERY</code> transaction line</td></tr>
+          <tr><td>Query 3 (Loan)</td><td><code>"eligibility"</code></td><td>Contains <code>742</code> bureau score and <code>eligible</code></td></tr>
+          <tr><td>Query 4 (No Token)</td><td>None (Rejected in Java)</td><td>HTTP 401: <code>{"error":"missing token"}</code></td></tr>
+        </table>
+
+        <div class="callout cb-green">
+          <div class="callout-lbl">✅ Task 4 Complete When</div>
+          <p>All four queries return expected payloads matching the table above. Both processes log clean interaction traces.</p>
+        </div>
+      </div>
+
+      <!-- TASK 5 -->
+      <div class="task-body" id="d2t1">
+        <div class="task-title">Task 6: CAP Freshness — knowledge.py &amp; reviews/CAP_TRADEOFFS.md (25 min)</div>
+        <div class="task-sub">Files: <code>python-orchestrator/orchestrator/knowledge.py</code> &amp; <code>reviews/CAP_TRADEOFFS.md</code></div>
+
+        <p>
+          Document the CAP Theorem architecture decisions for our multi-agent platform and explain the risks of
+          concurrent writes during network partitions.
+        </p>
+
+        <h4>Part A: Implement knowledge.py</h4>
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">python-orchestrator/orchestrator/knowledge.py</span>
+            <span class="code-tag tag-java">JAVA</span>
+          </div>
+          <pre class="code"><span class="kw">package</span> com.meridian.lab45.cap;
+
+<span class="kw">def</span> <span class="fn">freshness</span>(self) -&gt; Freshness:
+    now = self._clock()
+
+    <span class="kw">public static</span> String <span class="fn">givenUp</span>() {
+        <span class="kw">return</span> <span class="str">"C"</span>;
+    }
+
+    <span class="kw">public static</span> String <span class="fn">forReads</span>() {
+        <span class="kw">return</span> <span class="str">"AP"</span>;
+    }
+
+    <span class="kw">public static</span> String <span class="fn">forAWriteTool</span>() {
+        <span class="kw">return</span> <span class="str">"CP"</span>;
+    }
+}</pre>
+        </div>
+
+        <h4 style="margin-top:20px">Part B: Complete reviews/CAP_TRADEOFFS.md</h4>
+        <div class="code-wrap">
+          <div class="code-hdr">
+            <div class="dot" style="background:#f87171"></div>
+            <div class="dot" style="background:#fbbf24;margin-left:4px"></div>
+            <div class="dot" style="background:#34d399;margin-left:4px"></div>
+            <span class="code-title">reviews/CAP_TRADEOFFS.md</span>
+            <span class="code-tag tag-shell">MARKDOWN</span>
+          </div>
+          <pre class="code"># CAP note — fill this during Task 5
+
+1. Which CAP letter does this v1 design give up for specialist reads?
+   - Your answer: C
+
+2. So the pairing for reads is:
+   - Your answer: AP
+
+3. A later `initiatePayment` / debit tool would have to pick:
+   - Your answer: CP
+
+4. In one sentence: what goes wrong if Policy and Transaction both wrote the same balance during a partition?
+   - Your answer: Both nodes would independently deduct funds from the same account balance without synchronization, resulting in double debits and ledger corruption.</pre>
+        </div>
+
+        <div class="callout cb-green">
+          <div class="callout-lbl">✅ Task 5 Complete When</div>
+          <p>
+            Executing <code>cd python-orchestrator &amp;&amp; pytest tests/test_knowledge.py -q</code> passes with <strong>BUILD SUCCESS</strong>.<br>
+            Both <code>knowledge.py</code> and <code>reviews/CAP_TRADEOFFS.md</code> are filled.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CAP THEOREM DEEP DIVE ── -->
+  <div class="section" id="cap-theorem">
+    <div class="sec-lbl">Distributed Systems</div>
+    <h2>CAP Theorem Deep Dive — Financial Consistency</h2>
+    <p>
+      In distributed architectures, the <strong>CAP Theorem</strong> (Eric Brewer) proves that under a network partition (P),
+      a distributed system can guarantee <strong>Consistency (C)</strong> OR <strong>Availability (A)</strong>, but never both.
+    </p>
+
+    <table>
+      <tr><th>Operation Type</th><th>Chosen Guarantee</th><th>Behavior Under Partition</th><th>Banking Rationale</th></tr>
+      <tr>
+        <td><strong>Read Operations (v1 Specialists)</strong><br>Profile, Transactions, Policies</td>
+        <td><strong class="ok">AP (Availability + Partition Tolerance)</strong></td>
+        <td>Returns slightly stale cached data or last known ledger view.</td>
+        <td>Relationship manager can continue advising customer. Stale profile view for a few seconds carries minimal financial risk.</td>
+      </tr>
+      <tr>
+        <td><strong>Write Operations (Future Tools)</strong><br>Payment Transfer, Account Debit</td>
+        <td><strong class="bad">CP (Consistency + Partition Tolerance)</strong></td>
+        <td>Fails fast with HTTP 503; refuses transaction until partition heals.</td>
+        <td><strong>Zero tolerance for double debits</strong>. In banking ledgers, availability MUST be sacrificed to prevent split-brain monetary loss.</td>
+      </tr>
+    </table>
+
+    <div class="g2" style="margin-top:20px">
+      <div class="card">
+        <div class="card-head cyan">Real-World Case: UPI Balance vs RTGS Transfer</div>
+        <div class="card-body">
+          <p>
+            When checking your balance on Google Pay or PhonePe (read operation), the system operates on <strong>AP</strong>.
+            If one read replica is 50ms behind master, your balance might show Rs. 50,000 instead of Rs. 49,800.
+            The user experience remains fast and functional.
+          </p>
+          <p style="margin-top:10px">
+            However, when you execute an <strong>RTGS/NEFT interbank wire transfer</strong> (write operation), the switch operates on strict <strong>CP</strong>.
+            Every participating node must acknowledge the lock via two-phase commit (2PC) or distributed consensus.
+            If network latency spikes, the wire is paused. It never proceeds on stale state.
+          </p>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head amber">What "Giving Up C" Means in Practice</div>
+        <div class="card-body">
+          <p>
+            In v1, giving up C means accepting <strong>Eventual Consistency</strong>.
+            If customer Asha Raman makes a debit card purchase at POS 1 second before the RM queries her account,
+            the copilot might return her previous balance.
+          </p>
+          <p style="margin-top:10px">
+            This trade-off is intentional: an AI advisory copilot requires low latency and high availability to assist human officers.
+            Because v1 tools are strictly read-only, no ledger corruption can occur.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ACTIVITY (10 SCENARIOS) ── -->
+  <div class="section" id="activity">
+    <div class="sec-lbl">Interactive Discussion</div>
+    <h2>Architectural Review — 10 Production Scenarios</h2>
+    <p>
+      Evaluate these 10 real-world engineering scenarios. Click <strong>View Architectural Analysis</strong>
+      to reveal the technical verdict and rationale.
+    </p>
+
+    <div class="activity-grid">
+      <!-- Q1 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 1</span>
+          <div class="q-title">Downstream Orchestrator Outage</div>
+        </div>
+        <div class="q-body">What HTTP status code does the Java gateway return when the Python orchestrator process is stopped, and how is it mapped?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(1)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-1">
+          <strong>HTTP 503 Service Unavailable</strong>. In <code>QueryGateway.handle()</code>, <code>OrchestratorUnavailableException</code> is caught and <code>QueryController</code> formats a clean JSON body: <code>{"error":"orchestrator unavailable"}</code>.
+        </div>
+      </div>
+
+      <!-- Q2 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 2</span>
+          <div class="q-title">Dual-Keyword Prompt Routing</div>
+        </div>
+        <div class="q-body">An RM prompts: <em>"I need a top-up loan for my customer based on past transactions."</em> Which specialist handles it, and why?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(2)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-2">
+          <strong>Eligibility Specialist</strong>. In <code>app.py</code>, the <code>route()</code> function evaluates <code>ELIGIBILITY_WORDS</code> before <code>TRANSACTION_WORDS</code>. Because "loan" matches first, it returns <code>"eligibility"</code> immediately. Credit underwriting priority intentionally supersedes ledger display.
+        </div>
+      </div>
+
+      <!-- Q3 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 3</span>
+          <div class="q-title">Extending Specialist Domains</div>
+        </div>
+        <div class="q-body">If an engineering team adds an "insurance" specialist, what files in the Python orchestrator must change? Does Java change?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(3)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-3">
+          Only two Python files change: (1) <code>app.py</code> to add <code>INSURANCE_WORDS</code> and dispatch to the new agent; (2) <code>agents.py</code> to define <code>insurance()</code>. The <strong>Java Gateway requires zero modifications</strong> because it transparently proxies the request envelope without inspecting business domains.
+        </div>
+      </div>
+
+      <!-- Q4 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 4</span>
+          <div class="q-title">Token Stripping on Forward</div>
+        </div>
+        <div class="q-body">The gateway forwards requests to Python without the Bearer token. Why is this considered safe in enterprise topologies?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(4)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-4">
+          The Python orchestrator operates inside an isolated, private microservice subnet. The Java gateway serves as the perimeter security gatekeeper (DMZ). Stripping tokens follows the <strong>principle of least privilege</strong>: downstream workers do not need credentials they do not verify, preventing credential leakage in downstream logs.
+        </div>
+      </div>
+
+      <!-- Q5 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 5</span>
+          <div class="q-title">Authentication vs Authorisation (401 vs 403)</div>
+        </div>
+        <div class="q-body">What is the strict architectural distinction between HTTP 401 and HTTP 403 in the AI Gateway context?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(5)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-5">
+          <strong>HTTP 401 (Unauthenticated)</strong>: The gateway does not know who the caller is (missing or malformed Bearer token).<br>
+          <strong>HTTP 403 (Unauthorized / Forbidden)</strong>: The gateway knows who the caller is (token is valid), but that authenticated RM lacks entitlements to access that specific customer's profile.
+        </div>
+      </div>
+
+      <!-- Q6 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 6</span>
+          <div class="q-title">Credit Bureau Score Boundary</div>
+        </div>
+        <div class="q-body">If Asha Raman's bureau score returns as 699, what does the eligibility specialist return?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(6)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-6">
+          <strong>Not eligible</strong>. The threshold is <code>ELIGIBLE_SCORE = 700</code>. Evaluating <code>699 &gt;= 700</code> yields <code>False</code>. The agent returns: <code>{"agent": "eligibility", "answer": "Asha Raman is not eligible for the top-up loan; bureau score 699.", "customerId": "10428"}</code>.
+        </div>
+      </div>
+
+      <!-- Q7 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 7</span>
+          <div class="q-title">Rate Limiting 429 Header Dynamics</div>
+        </div>
+        <div class="q-body">When an RM makes 11 requests in 30 seconds, they receive HTTP 429 with <code>Retry-After: 60</code>. Where does "60" originate?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(7)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-7">
+          It originates from the token bucket rate limiter in <code>AdmissionControl</code> (configured in Lab 4.1/4.3). Each RM is granted a quota of 10 requests per 1-minute window (60 seconds). When exhausted, the header instructs the client to back off until the window rolls over.
+        </div>
+      </div>
+
+      <!-- Q8 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 8</span>
+          <div class="q-title">MCP Tool Error Trapping</div>
+        </div>
+        <div class="q-body">What occurs if <code>mcp_tools.py</code> returns <code>{"ok": False, "data": None, "error": "customer not found"}</code>?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(8)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-8">
+          The specialist intercepts <code>if not result["ok"]</code> and returns <code>{"agent": "eligibility", "answer": "customer not found", "customerId": customer_id}</code>. The orchestrator <strong>does not throw a 500</strong>; it gracefully formats the business error string back to the gateway.
+        </div>
+      </div>
+
+      <!-- Q9 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 9</span>
+          <div class="q-title">Direct /mcp Invocations vs Ingress</div>
+        </div>
+        <div class="q-body">Can an external frontend bypass <code>/v1/copilot/query</code> and call <code>POST /mcp</code> directly? Why or why not?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(9)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-9">
+          <strong>Never in production</strong>. <code>POST /mcp</code> is unauthenticated internal plumbing for microservices. If external frontends could hit <code>/mcp</code>, they would bypass rate limiting, token authentication, and audit logging. Ingress firewalls must block external access to <code>/mcp</code>.
+        </div>
+      </div>
+
+      <!-- Q10 -->
+      <div class="q-card">
+        <div class="q-header">
+          <span class="q-num">Scenario 10</span>
+          <div class="q-title">Where the LLM Fits in Module 5</div>
+        </div>
+        <div class="q-body">This lab contains no LLM. Where will the model sit when we advance to Module 5?</div>
+        <button class="q-reveal-btn" onclick="toggleAnswer(10)">💡 View Architectural Analysis</button>
+        <div class="q-answer" id="ans-10">
+          Inside the <strong>Python specialists in <code>agents.py</code></strong>. Instead of returning raw excerpts or simple strings, the specialist takes the retrieved banking data (tool context), injects it into a grounded prompt template, and invokes the LLM to generate an empathetic, conversational response for the RM.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── REFRESHER ── -->
+  <div class="section" id="refresher">
+    <div class="sec-lbl">Program Progression</div>
+    <h2>Where We Are in the FDE Journey</h2>
+    <p>
+      Module 4 has systematically guided you from high-level capacity planning to a fully functional,
+      multi-process AI gateway and orchestrator architecture.
+    </p>
+
+    <div class="progression-wrap">
+      <div class="prog-step">
+        <div class="prog-badge pb-done">Lab 4.1 ✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Capacity Planning &amp; Rate Limiting</div>
+          <p style="margin-top:4px;margin-bottom:0">Determined throughput constraints: 10 calls/min per RM, admission control token buckets, and failure thresholds under peak branch loads.</p>
+        </div>
+      </div>
+      <div class="prog-step">
+        <div class="prog-badge pb-done">Lab 4.2 ✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Architectural Decision Record (ADR)</div>
+          <p style="margin-top:4px;margin-bottom:0">Formally documented the architecture: Java owns ingress security, Python owns specialist dispatch, MCP tool bus in the banking JVM.</p>
+        </div>
+      </div>
+      <div class="prog-step">
+        <div class="prog-badge pb-done">Lab 4.3 ✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Hardened Banking REST APIs</div>
+          <p style="margin-top:4px;margin-bottom:0">Secured banking endpoints: Bearer authentication filters, OWASP input validation, 200ms bureau timeout fallback, and immutable audit event publishing.</p>
+        </div>
+      </div>
+      <div class="prog-step">
+        <div class="prog-badge pb-done">Lab 4.4 ✅</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--text)">Java MCP Server &amp; Tool Governance</div>
+          <p style="margin-top:4px;margin-bottom:0">Wrapped core banking logic into standard JSON-RPC MCP tools. Enforced strict governance: read-only tools visible, write tools hidden.</p>
+        </div>
+      </div>
+      <div class="prog-step">
+        <div class="prog-badge pb-now">Lab 4.5 ⚙️</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:var(--amber)">AI Gateway &amp; Python Orchestrator (Today)</div>
+          <p style="margin-top:4px;margin-bottom:0">Brought the ADR to life: Spring Boot Gateway + FastAPI Orchestrator + 3 Specialist Agents querying live MCP tools. Zero LLM.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" style="margin-top:28px">
+      <div class="card-head purple">The Complete Enterprise Data Path</div>
+      <div class="card-body">
+        <div class="flow-row" style="margin:8px 0">
+          <div class="flow-node fn-java"><div class="fn-label">Core System</div><div class="fn-name">Core Banking</div><div class="fn-sub">Ledger / DB</div></div>
+          <div class="flow-node fn-java"><div class="fn-label">Lab 4.3</div><div class="fn-name">REST APIs</div><div class="fn-sub">Secured Facade</div></div>
+          <div class="flow-node fn-mcp"><div class="fn-label">Lab 4.4</div><div class="fn-name">MCP Tools</div><div class="fn-sub">POST /mcp</div></div>
+          <div class="flow-node fn-py"><div class="fn-label">Lab 4.5</div><div class="fn-name">Specialists</div><div class="fn-sub">Orchestrator</div></div>
+          <div class="flow-node fn-java"><div class="fn-label">Lab 4.5</div><div class="fn-name">AI Gateway</div><div class="fn-sub">Port 8080</div></div>
+          <div class="flow-node fn-actor"><div class="fn-label">Client</div><div class="fn-name">Bank RM</div><div class="fn-sub">Copilot Response</div></div>
+        </div>
+        <p style="margin-top:14px;margin-bottom:0;font-size:13px">
+          Each lab added a single, independently verifiable architectural layer. No layer exceeds its defined responsibility.
+        </p>
+      </div>
+    </div>
+
+    <div class="g2" style="margin-top:20px">
+      <div class="card">
+        <div class="card-head blue">What the Forward Deployed Engineer Gained</div>
+        <div class="card-body">
+          <ul>
+            <li><strong>Polyglot Mastery</strong>: Confidently architecting hybrid enterprise systems combining Java's rock-solid ingress with Python's agile AI ecosystem.</li>
+            <li><strong>Zero-Trust Ingress</strong>: Mastery of admission control, token bucket rate limits, and 503 circuit-breaking patterns.</li>
+            <li><strong>Tool Protocol Engineering</strong>: Implementing Model Context Protocol (MCP) as the standardized tool abstraction bus.</li>
+            <li><strong>CAP Theorem Fluency</strong>: Practical understanding of when financial systems mandate CP vs when AI copilots leverage AP.</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-head purple">Teaser for Module 5 — The LLM Enters</div>
+        <div class="card-body">
+          <p>
+            With the enterprise plumbing, transport resilience, auth boundaries, and tool buses firmly established and tested,
+            we are ready for the final piece of the architecture.
+          </p>
+          <p>
+            In <strong>Module 5</strong>:
+          </p>
+          <ul>
+            <li>Specialists will feed tool outputs directly into generative LLM prompts.</li>
+            <li>We will tackle prompt grounding, hallucinations, and context window token budgeting.</li>
+            <li>The robust gateway built in Lab 4.5 will shield the enterprise as production AI takes flight.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /view-day2 -->
+
+</div><!-- /wrap -->
+
+<footer>
+  Lab 4.5 — AI Gateway &amp; Orchestrator · Cohort 1 · 5–6 November 2026 · Nuvepro · Enterprise AI Engineering (Java Developer &amp; Architect Track)
+</footer>
+
+<script>
+  function switchDay(dayNum) {
+    const isDay1 = dayNum === 1;
+
+    // Toggle view containers
+    const v1 = document.getElementById('view-day1');
+    const v2 = document.getElementById('view-day2');
+    if (v1 && v2) {
+      v1.style.display = isDay1 ? 'block' : 'none';
+      v2.style.display = isDay1 ? 'none' : 'block';
+    }
+
+    // Toggle day switcher buttons
+    const b1 = document.getElementById('btn-day1');
+    const b2 = document.getElementById('btn-day2');
+    if (b1 && b2) {
+      b1.classList.toggle('active', isDay1);
+      b2.classList.toggle('active', !isDay1);
+    }
+
+    // Toggle nav links
+    const nl1 = document.getElementById('nav-day1-links');
+    const nl2 = document.getElementById('nav-day2-links');
+    if (nl1 && nl2) {
+      nl1.style.display = isDay1 ? 'flex' : 'none';
+      nl2.style.display = isDay1 ? 'none' : 'flex';
+    }
+
+    // Toggle nav badge
+    const badge = document.getElementById('nav-day-badge');
+    if (badge) {
+      badge.textContent = isDay1 ? 'DAY 1 ACTIVE' : 'DAY 2 ACTIVE';
+      badge.style.color = isDay1 ? 'var(--accent)' : 'var(--green)';
+      badge.style.borderColor = isDay1 ? 'rgba(108,143,255,.35)' : 'rgba(52,211,153,.35)';
+      badge.style.background = isDay1 ? 'rgba(108,143,255,.15)' : 'rgba(52,211,153,.15)';
+    }
+
+    // Update Hero Content
+    const heroBadge = document.getElementById('hero-day-badge');
+    const heroTitle = document.getElementById('hero-title');
+    const heroSub = document.getElementById('hero-day-sub');
+    const flowStep = document.getElementById('flow-current-step');
+    const heroChips = document.getElementById('hero-chips-wrap');
+
+    if (heroBadge && heroTitle && heroSub) {
+      if (isDay1) {
+        heroBadge.textContent = 'Lab 4.5 · Day 1 of 2 · 5 November 2026 · 2 Hours';
+        heroTitle.innerHTML = 'AI Gateway &amp; Orchestrator<br><span style="font-weight:400;font-size:26px;color:var(--muted)">Day 1: Bringing the ADR to Life</span>';
+        heroSub.innerHTML = 'Lab 4.2 made the architectural decision: Java owns the ingress gatekeeper, and Python owns which specialist runs. Today in Day 1, that decision becomes running code — building the Java Gateway proxy, deterministic Python routing, and the three specialist agents.';
+        if (flowStep) flowStep.innerHTML = '⚙️ Lab 4.5 Day 1 — Gateway &amp; Specialists (Today)';
+        if (heroChips) {
+          heroChips.innerHTML = `
+            <span class="chip blue">Java 17 · Spring Boot 3.4 (Port 8080)</span>
+            <span class="chip cyan">Python 3.11 · FastAPI (Port 8090)</span>
+            <span class="chip green">MCP JSON-RPC Tool Bus</span>
+            <span class="chip amber">No LLM · Tasks 1, 2, 3</span>
+            <span class="chip purple">2 Languages · 2 Processes</span>
+          `;
+        }
+      } else {
+        heroBadge.textContent = 'Lab 4.5 · Day 2 of 2 · 6 November 2026 · 2 Hours';
+        heroTitle.innerHTML = 'AI Gateway &amp; Orchestrator<br><span style="font-weight:400;font-size:26px;color:var(--green)">Day 2: Live Integration, CAP &amp; Review</span>';
+        heroSub.innerHTML = 'With our Java Gateway and Python Orchestrator units built, today we connect both processes live, test end-to-end multi-agent dispatch, evaluate CAP theorem trade-offs in banking, and analyze 10 production architecture scenarios.';
+        if (flowStep) flowStep.innerHTML = '🚀 Lab 4.5 Day 2 — Integration &amp; CAP Theorem (Today)';
+        if (heroChips) {
+          heroChips.innerHTML = `
+            <span class="chip green">Live Multi-Process Ingress</span>
+            <span class="chip blue">Dual Ports :8080 &amp; :8090</span>
+            <span class="chip amber">CAP Theorem: AP Reads vs CP Writes</span>
+            <span class="chip purple">10 Architecture Scenarios</span>
+            <span class="chip cyan">Tasks 4 &amp; 5</span>
+          `;
+        }
+      }
+    }
+
+    try {
+      localStorage.setItem('lab45_active_day', dayNum);
+    } catch(e) {}
+
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  function showDay1Task(index) {
+    const bodies = document.querySelectorAll('#day1-tasks .task-body');
+    const buttons = document.querySelectorAll('#day1-tasks .t-btn');
+    bodies.forEach((b, i) => b.classList.toggle('show', i === index));
+    buttons.forEach((btn, i) => btn.classList.toggle('active', i === index));
+  }
+
+  function showDay2Task(index) {
+    const bodies = document.querySelectorAll('#day2-tasks .task-body');
+    const buttons = document.querySelectorAll('#day2-tasks .t-btn');
+    bodies.forEach((b, i) => b.classList.toggle('show', i === index));
+    buttons.forEach((btn, i) => btn.classList.toggle('active', i === index));
+  }
+
+  function toggleAnswer(id) {
+    const ans = document.getElementById('ans-' + id);
+    if (!ans) return;
+    const isShown = ans.classList.contains('show');
+    ans.classList.toggle('show', !isShown);
+    const btn = event.currentTarget;
+    if (btn) {
+      btn.innerHTML = isShown ? '💡 View Architectural Analysis' : '✕ Hide Analysis';
+    }
+  }
+
+  // Initial load state check
+  window.addEventListener('DOMContentLoaded', () => {
+    const params = new URLSearchParams(window.location.search);
+    const hash = window.location.hash.toLowerCase();
+    let initialDay = 1;
+
+    if (params.get('day') === '2' || hash.includes('day2') || hash.includes('cap') || hash.includes('activity') || hash.includes('refresher')) {
+      initialDay = 2;
+    } else if (params.get('day') === '1' || hash.includes('day1') || hash.includes('concept') || hash.includes('arch') || hash.includes('overview')) {
+      initialDay = 1;
+    } else {
+      try {
+        const saved = localStorage.getItem('lab45_active_day');
+        if (saved === '2') initialDay = 2;
+      } catch (e) {}
+    }
+
+    switchDay(initialDay);
+  });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,843 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Lab 4.5 Participant Guide â€” AI Gateway &amp; Python Orchestrator</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap');
+    :root{
+      --bg:#0d1117;--s1:#161b27;--s2:#1e2438;--border:#2a3050;
+      --accent:#6c8fff;--purple:#a78bfa;--green:#34d399;--amber:#fbbf24;
+      --red:#f87171;--cyan:#22d3ee;--text:#e2e8f0;--muted:#94a3b8;--dim:#64748b;
+      --java:#e8976b;--python:#4da6ff;
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{background:var(--bg);color:var(--text);font-family:'Inter',sans-serif;font-size:15px;line-height:1.75}
+    p{color:var(--muted);margin-bottom:12px}
+    ul,ol{color:var(--muted);padding-left:22px;margin-bottom:12px}
+    li{margin-bottom:6px}
+    strong{color:var(--text)}
+    code{font-family:'JetBrains Mono',monospace;font-size:12px;background:var(--s2);color:#93c5fd;padding:2px 8px;border-radius:4px;border:1px solid var(--border)}
+
+    /* NAV */
+    nav{position:sticky;top:0;z-index:200;background:rgba(13,17,23,.97);backdrop-filter:blur(10px);border-bottom:1px solid var(--border);padding:0 36px;display:flex;align-items:center;gap:4px;overflow-x:auto}
+    .nav-logo{font-size:13px;font-weight:700;color:var(--text);padding:14px 16px 14px 0;border-right:1px solid var(--border);margin-right:6px;white-space:nowrap;display:flex;align-items:center;gap:8px}
+    .nav-badge{background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.3);color:var(--green);font-size:10px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+    
+    /* NAV DAY SWITCHER */
+    .day-selector-wrap{display:flex;align-items:center;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:3px;margin:0 8px;gap:3px}
+    .day-pill-btn{display:inline-flex;align-items:center;gap:6px;padding:6px 12px;border-radius:5px;font-size:11.5px;font-weight:700;color:var(--muted);background:transparent;border:1px solid transparent;cursor:pointer;transition:all .18s;font-family:'Inter',sans-serif;white-space:nowrap}
+    .day-pill-btn:hover{color:var(--text);background:rgba(255,255,255,.05)}
+    .day-pill-btn.active{background:rgba(108,143,255,.18);color:var(--accent);border-color:rgba(108,143,255,.4)}
+    .day-pill-btn.d1.active{background:rgba(232,151,107,.18);color:var(--java);border-color:rgba(232,151,107,.4)}
+    .day-pill-btn.d2.active{background:rgba(52,211,153,.18);color:var(--green);border-color:rgba(52,211,153,.4)}
+
+    nav a{padding:14px 10px;font-size:12px;font-weight:600;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap;text-decoration:none;transition:all .15s}
+    nav a:hover{color:var(--accent);border-color:var(--accent)}
+
+    /* HERO */
+    .hero{background:linear-gradient(135deg,#0d1117 0%,#0e1630 45%,#0d1520 100%);border-bottom:1px solid var(--border);padding:52px 48px 44px;position:relative;overflow:hidden}
+    .hero::before{content:'';position:absolute;top:-80px;right:-80px;width:480px;height:480px;background:radial-gradient(circle,rgba(52,211,153,.06) 0%,transparent 70%);pointer-events:none}
+    .hero-badge{display:inline-flex;align-items:center;gap:8px;background:rgba(52,211,153,.1);border:1px solid rgba(52,211,153,.3);border-radius:100px;padding:5px 16px;font-size:11px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:16px}
+    .hero h1{font-size:36px;font-weight:800;line-height:1.15;background:linear-gradient(135deg,#e2e8f0 0%,#34d399 50%,#6c8fff 100%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:14px}
+    .hero-sub{font-size:15px;color:var(--muted);max-width:720px;line-height:1.8;margin-bottom:24px}
+    .hero-pills{display:flex;gap:10px;flex-wrap:wrap}
+    .pill{background:var(--s2);border:1px solid var(--border);border-radius:6px;padding:5px 14px;font-size:12px;color:var(--muted)}
+    .pill.g{background:rgba(52,211,153,.07);border-color:rgba(52,211,153,.25);color:var(--green)}
+    .pill.b{background:rgba(108,143,255,.07);border-color:rgba(108,143,255,.25);color:var(--accent)}
+    .pill.a{background:rgba(251,191,36,.07);border-color:rgba(251,191,36,.25);color:var(--amber)}
+    .pill.p{background:rgba(167,139,250,.07);border-color:rgba(167,139,250,.25);color:var(--purple)}
+
+    /* LAYOUT */
+    .wrap{max-width:1040px;margin:0 auto;padding:52px 48px}
+    .section{margin-bottom:60px}
+    .sec-lbl{font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+    .sec-lbl::after{content:'';flex:1;height:1px;background:var(--border)}
+    h2{font-size:26px;font-weight:700;color:var(--text);margin-bottom:12px}
+    h3{font-size:17px;font-weight:600;color:var(--text);margin-bottom:8px;margin-top:22px}
+    h4{font-size:13px;font-weight:700;color:var(--dim);margin-bottom:6px;text-transform:uppercase;letter-spacing:.6px}
+
+    /* GRIDS */
+    .g2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+
+    /* CARDS */
+    .card{background:var(--s1);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .card-head{padding:14px 20px;border-bottom:1px solid var(--border);font-size:11px;font-weight:700;letter-spacing:.8px;text-transform:uppercase}
+    .card-head.b{color:var(--accent);background:rgba(108,143,255,.06)}
+    .card-head.g{color:var(--green);background:rgba(52,211,153,.05)}
+    .card-head.a{color:var(--amber);background:rgba(251,191,36,.05)}
+    .card-head.r{color:var(--red);background:rgba(248,113,113,.05)}
+    .card-head.c{color:var(--cyan);background:rgba(34,211,238,.05)}
+    .card-head.p{color:var(--purple);background:rgba(167,139,250,.05)}
+    .card-body{padding:20px;font-size:13px}
+    .card-body p{font-size:13px}
+
+    /* CALLOUTS */
+    .callout{border-radius:10px;padding:14px 18px;margin:14px 0;font-size:13px}
+    .callout p{font-size:13px;margin:0}
+    .callout-lbl{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+    .cb-b{background:rgba(108,143,255,.06);border:1px solid rgba(108,143,255,.2);border-left:3px solid var(--accent)}.cb-b .callout-lbl{color:var(--accent)}
+    .cb-g{background:rgba(52,211,153,.05);border:1px solid rgba(52,211,153,.2);border-left:3px solid var(--green)}.cb-g .callout-lbl{color:var(--green)}
+    .cb-a{background:rgba(251,191,36,.05);border:1px solid rgba(251,191,36,.2);border-left:3px solid var(--amber)}.cb-a .callout-lbl{color:var(--amber)}
+    .cb-r{background:rgba(248,113,113,.05);border:1px solid rgba(248,113,113,.2);border-left:3px solid var(--red)}.cb-r .callout-lbl{color:var(--red)}
+    .cb-c{background:rgba(34,211,238,.05);border:1px solid rgba(34,211,238,.2);border-left:3px solid var(--cyan)}.cb-c .callout-lbl{color:var(--cyan)}
+    .cb-p{background:rgba(167,139,250,.06);border:1px solid rgba(167,139,250,.2);border-left:3px solid var(--purple)}.cb-p .callout-lbl{color:var(--purple)}
+
+    /* CODE */
+    .code-wrap{background:#070b14;border:1px solid var(--border);border-radius:11px;overflow:hidden;margin:12px 0}
+    .code-hdr{background:var(--s1);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:7px}
+    .dot{width:10px;height:10px;border-radius:50%}
+    .code-title{font-size:11px;font-weight:600;color:var(--dim);flex:1;margin-left:4px}
+    .ctag{font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 9px;border-radius:4px}
+    .ctag-j{background:rgba(232,151,107,.12);color:var(--java);border:1px solid rgba(232,151,107,.3)}
+    .ctag-g{background:rgba(52,211,153,.1);color:var(--green);border:1px solid rgba(52,211,153,.25)}
+    .ctag-s{background:rgba(251,191,36,.08);color:var(--amber);border:1px solid rgba(251,191,36,.25)}
+    .ctag-p{background:rgba(77,166,255,.1);color:var(--python);border:1px solid rgba(77,166,255,.25)}
+    pre.code{padding:18px 20px;font-family:'JetBrains Mono',monospace;font-size:12.5px;line-height:1.85;overflow-x:auto;white-space:pre;color:#cbd5e1}
+    .kw{color:#a78bfa}.str{color:#86efac}.cm{color:#475569;font-style:italic}
+    .fn{color:#93c5fd}.nu{color:#fb923c}.an{color:#fbbf24}.tp{color:var(--java)}
+
+    /* FILE MAP */
+    .file-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;margin:16px 0}
+    .file-card{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+    .file-name{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--accent);margin-bottom:6px;font-weight:600}
+    .file-role{font-size:12px;color:var(--dim);line-height:1.55}
+    .file-card.edit{border-color:rgba(251,191,36,.4);background:rgba(251,191,36,.04)}
+    .file-card.edit .file-name{color:var(--amber)}
+    .file-card.read{border-color:rgba(52,211,153,.3);background:rgba(52,211,153,.03)}
+    .file-card.read .file-name{color:var(--green)}
+    .file-card.noedit{border-color:rgba(248,113,113,.25);background:rgba(248,113,113,.03)}
+    .file-card.noedit .file-name{color:var(--red)}
+    .file-badge{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.8px;text-transform:uppercase;padding:2px 8px;border-radius:4px;margin-bottom:6px}
+    .fb-edit{background:rgba(251,191,36,.15);color:var(--amber);border:1px solid rgba(251,191,36,.3)}
+    .fb-read{background:rgba(52,211,153,.12);color:var(--green);border:1px solid rgba(52,211,153,.25)}
+    .fb-no{background:rgba(248,113,113,.12);color:var(--red);border:1px solid rgba(248,113,113,.25)}
+
+    /* TASK STEPS */
+    .task-block{background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin:20px 0}
+    .task-head{padding:20px 24px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:16px}
+    .task-num{width:38px;height:38px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:800;flex-shrink:0;color:#fff}
+    .tn1{background:#e8976b;color:#0d1117}.tn2{background:#4da6ff;color:#0d1117}.tn3{background:#34d399;color:#0d1117}.tn4{background:#fbbf24;color:#0d1117}.tn5{background:#a78bfa;color:#0d1117}
+    .task-title-wrap{flex:1}
+    .task-label{font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:3px;color:var(--dim)}
+    .task-title{font-size:18px;font-weight:700;color:var(--text)}
+    .task-time{font-size:12px;color:var(--amber);margin-top:2px}
+    .task-inner{padding:24px}
+
+    /* STEP INSIDE A TASK */
+    .step-row{display:flex;gap:14px;margin-bottom:16px}
+    .step-dot{width:7px;height:7px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:8px}
+    .step-text{flex:1;font-size:13px;color:var(--muted)}
+
+    /* TABLE */
+    table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+    th,td{padding:10px 14px;border:1px solid var(--border);text-align:left;vertical-align:top}
+    th{background:var(--s2);color:var(--text);font-weight:600;font-size:12px}
+    td{color:var(--muted)}
+    .ok{color:var(--green);font-weight:600}.warn{color:var(--amber);font-weight:600}.bad{color:var(--red);font-weight:600}
+
+    /* TEST RESULT BOX */
+    .test-box{background:#070b14;border:1px solid rgba(52,211,153,.3);border-radius:10px;padding:16px 18px;margin:14px 0}
+    .test-label{font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--green);margin-bottom:8px}
+    .test-cmd{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--amber);margin-bottom:8px}
+    .test-out{font-family:'JetBrains Mono',monospace;font-size:12px;color:#86efac;line-height:1.7}
+
+    /* LEGEND */
+    .legend{display:flex;gap:16px;flex-wrap:wrap;margin:12px 0 20px}
+    .legend-item{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--muted)}
+    .legend-dot{width:10px;height:10px;border-radius:2px}
+
+    /* FOOTER */
+    footer{border-top:1px solid var(--border);padding:22px 48px;text-align:center;font-size:12px;color:var(--dim);background:var(--s1)}
+
+    @media(max-width:800px){
+      nav,.hero,.wrap,footer{padding-left:18px;padding-right:18px}
+      .g2,.g3{grid-template-columns:1fr}
+      .hero h1{font-size:26px}
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <span>Module 4.5</span>
+    <span class="nav-badge">Participant Guide</span>
+  </div>
+
+  <!-- Day View Filter Buttons -->
+  <div class="day-selector-wrap">
+    <button class="day-pill-btn active" id="pg-btn-all" onclick="filterGuide('all')">All Tasks (1â€“5)</button>
+    <button class="day-pill-btn d1" id="pg-btn-d1" onclick="filterGuide('1')">Day 1 Focus (Tasks 1â€“3)</button>
+    <button class="day-pill-btn d2" id="pg-btn-d2" onclick="filterGuide('2')">Day 2 Focus (Tasks 4â€“5)</button>
+  </div>
+
+  <a href="#before">Before You Start</a>
+  <a href="#structure">Structure</a>
+  <a href="#concepts">Concepts</a>
+  <a href="#task1" class="nav-d1">Task 1 (Proxy)</a>
+  <a href="#task2" class="nav-d1">Task 2 (Routing)</a>
+  <a href="#task3" class="nav-d1">Task 3 (Specialists)</a>
+  <a href="#task4" class="nav-d2">Task 4 (Integration)</a>
+  <a href="#task5" class="nav-d2">Task 5 (CAP)</a>
+  <a href="#errors">Errors</a>
+</nav>
+
+<div class="hero">
+  <div class="hero-badge">ðŸ“˜ Participant Guide â€” Self-Paced Reference</div>
+  <h1>Lab 4.5 â€” AI Gateway &amp; Python Orchestrator<br>Your Step-by-Step Reference</h1>
+  <p class="hero-sub">
+    This guide walks you through implementing the Lab 4.2 architecture: a Java Spring Boot AI Gateway
+    handling ingress security, rate limiting, and failure masking, fronting a Python FastAPI Orchestrator
+    that coordinates three specialist agents calling live Java MCP tools.
+  </p>
+  <div class="hero-pills">
+    <span class="pill g">4 files to edit + 1 review note Â· ~80 lines total</span>
+    <span class="pill b">Java 17 (Port 8080) Â· Python 3.11 (Port 8090)</span>
+    <span class="pill a">Test-driven with Maven &amp; Pytest</span>
+    <span class="pill p">CAP theorem reasoning</span>
+  </div>
+</div>
+
+<div class="wrap">
+
+<!-- â•â•â•â•â•â• BEFORE YOU START â•â•â•â•â•â• -->
+<div class="section" id="before">
+  <div class="sec-lbl">Orientation</div>
+  <h2>Before You Start: What This Lab Is About</h2>
+  <p>
+    In Lab 4.2, you authored the Architecture Decision Record (ADR) establishing that enterprise ingress
+    concerns (authentication, rate limiting, audit logging) belong in Java, while agile agent routing
+    belongs in Python. In Lab 4.3, you built hardened REST APIs. In Lab 4.4, you exposed those APIs
+    as governed MCP tools.
+  </p>
+  <p>
+    <strong>Lab 4.5 is where that architecture becomes running code.</strong> You will connect the Java Gateway
+    and the Python Orchestrator across two processes, verify end-to-end multi-agent dispatch, and evaluate
+    distributed consistency trade-offs (CAP Theorem) when agents access shared banking data.
+  </p>
+
+  <div class="g3" style="margin-top:20px">
+    <div class="card">
+      <div class="card-head g">Everything is Self-Contained</div>
+      <div class="card-body">
+        <p>This project repository contains everything required:</p>
+        <ul>
+          <li>Lab 4.3 auth &amp; admission classes (pre-compiled on classpath)</li>
+          <li>Lab 4.4 MCP banking tools (running inside gateway JVM)</li>
+          <li>Python orchestrator scaffolding in <code>orchestrator/</code></li>
+        </ul>
+        <p style="margin-top:8px">No external servers or API keys needed.</p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head b">What You Will Implement</div>
+      <div class="card-body">
+        <ul>
+          <li><strong>Tasks 2â€“4 (Day 1)</strong> â€” Java: <code>GatewayAuthFilter</code>, <code>QueryGateway</code>, <code>HttpOrchestratorClient</code></li>
+          <li><strong>Task 5 (Day 1)</strong> â€” Python: <code>router.py</code> rules router</li>
+          <li><strong>Tasks 6â€“7 (Day 2)</strong> â€” Python: CAP freshness, domain specialists</li>
+          <li><strong>Task 8 (Day 2)</strong> â€” Python: orchestrator pipeline + resilience</li>
+          <li><strong>Task 9 (Day 2)</strong> â€” Live end-to-end integration check</li>
+        </ul>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head a">How to Verify Your Work</div>
+      <div class="card-body">
+        <p>Verify incrementally after each task:</p>
+        <code style="display:block;padding:8px;margin-top:6px">mvn -Dtest=... test</code>
+        <code style="display:block;padding:8px;margin-top:6px">python -m pytest tests/python -q</code>
+        <p style="margin-top:8px">Automated tests act as your precise answer key.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout cb-a" style="margin-top:16px">
+    <div class="callout-lbl">Windows PowerShell Tips</div>
+    <p>
+      1. Always quote <code>"-Preference"</code> in PowerShell: <code>mvn test "-Preference"</code> (unquoted <code>-Preference</code> is treated as a redirect).<br>
+      2. Set environment variables using PowerShell syntax: <code>$env:LAB45_MCP_URL = "http://127.0.0.1:8080/mcp"</code>.
+    </p>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• PROJECT STRUCTURE â•â•â•â•â•â• -->
+<div class="section" id="structure">
+  <div class="sec-lbl">Project Structure</div>
+  <h2>Which Files Are Which</h2>
+
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div> You edit this file</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Read-only reference â€” understand it</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div> Pre-built / provided code</div>
+  </div>
+
+  <h4>1. Java Gateway Layer â€” <code>src/main/java/com/meridian/lab45/gateway/</code></h4>
+  <div class="file-grid">
+    <div class="file-card edit">
+      <div class="file-badge fb-edit">âœ Edit â€” Task 1 (Day 1)</div>
+      <div class="file-name">QueryGateway.java</div>
+      <div class="file-role">Proxies authenticated query to Python orchestrator; maps connection errors to 503.</div>
+    </div>
+    <div class="file-card read">
+      <div class="file-badge fb-read">ðŸ“– Read</div>
+      <div class="file-name">CopilotController.java</div>
+      <div class="file-role">Handles validation, admission (rate limiting 429), and routes to the orchestrator via <code>HttpOrchestratorClient</code>.</div>
+    </div>
+    <div class="file-card read">
+      <div class="file-badge fb-read">ðŸ“– Read</div>
+      <div class="file-name">GatewayConfig.java</div>
+      <div class="file-role">Wires Spring <code>RestClient</code> and Lab 4.1 <code>AdmissionControl</code> beans.</div>
+    </div>
+    <div class="file-card noedit">
+      <div class="file-badge fb-no">ðŸ”’ Provided</div>
+      <div class="file-name">OrchestratorUnavailableException.java</div>
+      <div class="file-role">Spring runtime exception mapped by <code>@ExceptionHandler</code> to HTTP 503.</div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px">2. Python Orchestrator Layer â€” <code>orchestrator/</code></h4>
+  <div class="file-grid">
+    <div class="file-card edit">
+      <div class="file-badge fb-edit">âœ Edit â€” Task 2 (Day 1)</div>
+      <div class="file-name">app.py</div>
+      <div class="file-role">FastAPI server on port 8090. You implement the keyword <code>route()</code> function.</div>
+    </div>
+    <div class="file-card edit">
+      <div class="file-badge fb-edit">âœ Edit â€” Task 3 (Day 1)</div>
+      <div class="file-name">agents.py</div>
+      <div class="file-role">Houses 3 specialist functions: <code>policy</code>, <code>transaction</code>, <code>eligibility</code>.</div>
+    </div>
+    <div class="file-card noedit">
+      <div class="file-badge fb-no">ðŸ”’ Provided</div>
+      <div class="file-name">mcp_tools.py</div>
+      <div class="file-role">HTTP client calling Java gateway's <code>POST /mcp</code> via standard JSON-RPC.</div>
+    </div>
+    <div class="file-card noedit">
+      <div class="file-badge fb-no">ðŸ”’ Provided</div>
+      <div class="file-name">requirements.txt</div>
+      <div class="file-role">Python runtime dependencies: <code>fastapi</code>, <code>uvicorn</code>, <code>httpx</code>, <code>pytest</code>.</div>
+    </div>
+  </div>
+
+  <h4 style="margin-top:20px">3. CAP Architecture &amp; Review â€” <code>cap/</code> &amp; <code>reviews/</code></h4>
+  <div class="file-grid">
+    <div class="file-card edit">
+      <div class="file-badge fb-edit">âœ Edit â€” Task 5 (Day 2)</div>
+      <div class="file-name">knowledge.py</div>
+      <div class="file-role">Returns CAP pairings: <code>givenUp()</code> ("C"), <code>forReads()</code> ("AP"), <code>forAWriteTool()</code> ("CP").</div>
+    </div>
+    <div class="file-card edit">
+      <div class="file-badge fb-edit">âœ Edit â€” Task 5 (Day 2)</div>
+      <div class="file-name">reviews/CAP_TRADEOFFS.md</div>
+      <div class="file-role">Document explaining consistency trade-offs when agents interact with financial ledgers.</div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• CONCEPTS â•â•â•â•â•â• -->
+<div class="section" id="concepts">
+  <div class="sec-lbl">Architectural Context</div>
+  <h2>Core Concepts to Keep in Mind</h2>
+
+  <div class="g2" style="margin-top:16px">
+    <div class="card">
+      <div class="card-head b">ðŸ›¡ï¸ Java as the Regulated Gatekeeper</div>
+      <div class="card-body">
+        <p>
+          Corporate bank users connect exclusively to the Java Gateway (port 8080).
+          Java verifies the Bearer token and checks rate-limit quotas <strong>before</strong> forwarding.
+          Unauthenticated requests never reach Python.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head c">âš¡ Failure Masking (HTTP 503)</div>
+      <div class="card-body">
+        <p>
+          When the Python orchestrator is offline, Spring's <code>RestClient</code> throws
+          <code>ResourceAccessException</code>. The gateway translates this to a clean
+          HTTP 503 <code>{"error":"orchestrator unavailable"}</code> â€” never leaking stack traces.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head a">ðŸŽ¯ Deterministic Keyword Routing</div>
+      <div class="card-body">
+        <p>
+          Routing follows strict business priority:
+          <strong>Eligibility</strong> (loan, bureau, top-up) beats <strong>Transaction</strong> (history, recent, last),
+          which beats default <strong>Policy</strong>. Credit underwriting takes priority over statement lookups.
+        </p>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-head p">âš–ï¸ CAP Theorem: AP Reads vs CP Writes</div>
+      <div class="card-body">
+        <p>
+          Specialists in v1 only read customer data â€” sacrificing absolute consistency for high availability (AP).
+          Any future money transfer / debit tool must enforce consistency (CP) to prevent double debits.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• TASK 1 â•â•â•â•â•â• -->
+<div class="section task-section" id="task1" data-day="1">
+  <div class="sec-lbl">Task 1 of 5 Â· Day 1</div>
+  <div class="task-block">
+    <div class="task-head">
+      <div class="task-num tn1">1</div>
+      <div class="task-title-wrap">
+        <div class="task-label">Java Gateway Layer (Day 1)</div>
+        <div class="task-title">Tasks 2â€“4: GatewayAuthFilter Â· QueryGateway Â· HttpOrchestratorClient</div>
+        <div class="task-time">â± ~35 minutes</div>
+      </div>
+    </div>
+    <div class="task-inner">
+      <p><strong>File to edit:</strong> <code>src/main/java/com/meridian/lab45/security/GatewayAuthFilter.java</code></p>
+      <p>
+        The gateway receives an authenticated <code>QueryRequest</code> and must forward it to the Python orchestrator
+        using Spring's modern fluent <code>RestClient</code>. If Python is unreachable, you must trap the error and
+        throw <code>OrchestratorUnavailableException</code>.
+      </p>
+
+      <h3>Step-by-Step Implementation</h3>
+      <div class="step-row">
+        <div class="step-dot"></div>
+        <div class="step-text">Implement bearer token check with <code>MessageDigest.isEqual</code>, then require <code>X-RM-Id</code> header.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot"></div>
+        <div class="step-text">Initiate an HTTP POST to <code>orchestratorUrl</code> with <code>APPLICATION_JSON</code> content type.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot"></div>
+        <div class="step-text">Pass <code>request</code> in the body, retrieve, and deserialize to <code>OrchestratorReply.class</code>.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot"></div>
+        <div class="step-text">Validate that the reply is non-null; if null, throw <code>OrchestratorUnavailableException</code>.</div>
+      </div>
+      <div class="step-row">
+        <div class="step-dot"></div>
+        <div class="step-text">Wrap the call in a <code>try-catch</code> handling <code>ResourceAccessException</code> and <code>RestClientException</code>, re-throwing as <code>OrchestratorUnavailableException</code>.</div>
+      </div>
+
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#e8976b"></div><span class="code-title">GatewayAuthFilter.java — doFilterInternal</span><span class="ctag ctag-j">JAVA</span></div>
+        <pre class="code"><span class="kw">package</span> com.meridian.lab45.gateway;
+
+<span class="kw">import</span> com.meridian.lab43.LabProperties;
+<span class="kw">import</span> com.meridian.lab45.model.OrchestratorReply;
+<span class="kw">import</span> com.meridian.lab45.model.QueryRequest;
+<span class="kw">import</span> org.springframework.http.MediaType;
+<span class="kw">import</span> org.springframework.stereotype.Service;
+<span class="kw">import</span> org.springframework.web.client.ResourceAccessException;
+<span class="kw">import</span> org.springframework.web.client.RestClient;
+<span class="kw">import</span> org.springframework.web.client.RestClientException;
+
+<span class="an">@Service</span>
+<span class="kw">public class</span> GatewayAuthFilter <span class="kw">extends</span> OncePerRequestFilter {
+    <span class="kw">private final</span> RestClient http;
+    <span class="kw">private final</span> String orchestratorUrl;
+
+    <span class="kw">protected void</span> <span class="fn">doFilterInternal</span>(HttpServletRequest request,
+            HttpServletResponse response, FilterChain chain) <span class="kw">throws</span> IOException {
+        <span class="kw">this</span>.http = restClient;
+        <span class="kw">this</span>.orchestratorUrl = properties.orchestratorUrl();
+    }
+
+    <span class="kw">public</span> OrchestratorReply <span class="fn">forward</span>(QueryRequest request) {
+        <span class="kw">try</span> {
+            OrchestratorReply reply = http.<span class="fn">post</span>()
+                    .<span class="fn">uri</span>(orchestratorUrl)
+                    .<span class="fn">contentType</span>(MediaType.APPLICATION_JSON)
+                    .<span class="fn">body</span>(request)
+                    .<span class="fn">retrieve</span>()
+                    .<span class="fn">body</span>(OrchestratorReply.class);
+            <span class="kw">if</span> (reply == <span class="kw">null</span>) {
+                <span class="kw">throw new</span> OrchestratorUnavailableException(
+                    <span class="kw">new</span> IllegalStateException(<span class="str">"empty orchestrator body"</span>));
+            }
+            <span class="kw">return</span> reply;
+        } <span class="kw">catch</span> (ResourceAccessException ex) {
+            <span class="kw">throw new</span> OrchestratorUnavailableException(ex);
+        } <span class="kw">catch</span> (RestClientException ex) {
+            <span class="kw">throw new</span> OrchestratorUnavailableException(ex);
+        }
+    }
+}</pre>
+      </div>
+
+      <div class="test-box">
+        <div class="test-label">âœ… Test Your Work</div>
+        <div class="test-cmd">mvn -Dtest=GatewayAuthHttpTest test</div>
+        <div class="test-out">BUILD SUCCESS: 401 on missing auth, 503 on orchestrator connection failure, 200 on success.</div>
+      </div>
+
+      <div class="callout cb-r">
+        <div class="callout-lbl">Crucial Architecture Boundary</div>
+        <p>
+          Do not attempt to catch token authentication failures inside <code>forward()</code>.
+          The 401 check is executed in <code>CopilotController</code> before <code>forward()</code> is invoked.
+          Unauthenticated calls must never trigger network I/O.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• TASK 2 â•â•â•â•â•â• -->
+<div class="section task-section" id="task2" data-day="1">
+  <div class="sec-lbl">Task 2 of 5 Â· Day 1</div>
+  <div class="task-block">
+    <div class="task-head">
+      <div class="task-num tn2">2</div>
+      <div class="task-title-wrap">
+        <div class="task-label">Python Orchestrator Layer (Day 1)</div>
+        <div class="task-title">route() in app.py â€” Keyword Dispatcher</div>
+        <div class="task-time">â± ~25 minutes</div>
+      </div>
+    </div>
+    <div class="task-inner">
+      <p><strong>File to edit:</strong> <code>python-orchestrator/orchestrator/router.py</code></p>
+      <p>
+        Implement the <code>route(prompt: str) -&gt; str</code> function to classify incoming prompts
+        based on strict keyword priority rules.
+      </p>
+
+      <h3>Priority Rules</h3>
+      <table>
+        <tr><th>Priority</th><th>Agent Name</th><th>Keyword Tuple</th></tr>
+        <tr><td><strong>1 (Highest)</strong></td><td><code>"eligibility"</code></td><td><code>ELIGIBILITY_WORDS = ("eligible", "eligibility", "loan", "bureau", "top-up", "topup")</code></td></tr>
+        <tr><td><strong>2 (Medium)</strong></td><td><code>"transaction"</code></td><td><code>TRANSACTION_WORDS = ("transaction", "transactions", "history", "recent", "last")</code></td></tr>
+        <tr><td><strong>3 (Default)</strong></td><td><code>"policy"</code></td><td>Fallback for fee queries, charges, product questions, greetings</td></tr>
+      </table>
+
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#4da6ff"></div><span class="code-title">router.py &#x2014; RulesRouter.route() Implementation</span><span class="ctag ctag-p">PYTHON</span></div>
+        <pre class="code"><span class="kw">def</span> <span class="fn">route</span>(prompt: str) -&gt; str:
+    text = (prompt <span class="kw">or</span> <span class="str">""</span>).lower()
+    <span class="kw">if</span> any(word <span class="kw">in</span> text <span class="kw">for</span> word <span class="kw">in</span> ELIGIBILITY_WORDS):
+        <span class="kw">return</span> <span class="str">"eligibility"</span>
+    <span class="kw">if</span> any(word <span class="kw">in</span> text <span class="kw">for</span> word <span class="kw">in</span> TRANSACTION_WORDS):
+        <span class="kw">return</span> <span class="str">"transaction"</span>
+    <span class="kw">return</span> <span class="str">"policy"</span></pre>
+      </div>
+
+      <div class="test-box">
+        <div class="test-label">âœ… Test Your Work</div>
+        <div class="test-cmd">cd python-orchestrator &amp;&amp; pytest tests/test_router.py -q</div>
+        <div class="test-out">4 passed: fee -&gt; policy, last transactions -&gt; transaction, top-up loan -&gt; eligibility, Good morning -&gt; policy.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• TASK 3 â•â•â•â•â•â• -->
+<div class="section task-section" id="task3" data-day="1">
+  <div class="sec-lbl">Task 3 of 5 Â· Day 1</div>
+  <div class="task-block">
+    <div class="task-head">
+      <div class="task-num tn3">3</div>
+      <div class="task-title-wrap">
+        <div class="task-label">Python Agent Specialists (Day 1)</div>
+        <div class="task-title">agents.py â€” Implement Policy, Transaction &amp; Eligibility</div>
+        <div class="task-time">â± ~40 minutes</div>
+      </div>
+    </div>
+    <div class="task-inner">
+      <p><strong>Files to edit:</strong> <code>python-orchestrator/orchestrator/agents/eligibility.py</code>, <code>policy.py</code>, <code>transaction.py</code></p>
+      <p>
+        Each specialist function receives <code>(customer_id: str, prompt: str, call: ToolFn = call_tool)</code>,
+        invokes its designated MCP tool, formats the response, and returns <code>{"agent": ..., "answer": ..., "customerId": ...}</code>.
+      </p>
+
+      <h3>Specialist Contracts</h3>
+      <ul>
+        <li><strong>Policy</strong>: Invokes <code>searchPolicies</code> with <code>{"query": prompt}</code>. Returns <code>excerpt</code> text.</li>
+        <li><strong>Transaction</strong>: Invokes <code>getRecentTransactions</code> with <code>{"customerId": customer_id, "size": 5}</code>. Formats lines containing date, description, and amount (must include <code>GROCERY</code>).</li>
+        <li><strong>Eligibility</strong>: Invokes <code>getCustomerProfile</code> with <code>{"customerId": customer_id}</code>. Checks <code>bureauScore &gt;= 700</code>. Formats answer stating eligibility and score (e.g., <code>742</code>).</li>
+        <li><strong>Tool Errors</strong>: If <code>not result["ok"]</code>, return <code>{"agent": agent_name, "answer": result["error"], "customerId": customer_id}</code>.</li>
+      </ul>
+
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#34d399"></div><span class="code-title">agents/ &#x2014; Policy, Transaction &amp; Eligibility Specialists</span><span class="ctag ctag-p">PYTHON</span></div>
+        <pre class="code"><span class="str">"""Three specialists. Each calls one Java MCP tool and returns {agent, answer, customerId}."""</span>
+
+<span class="kw">from</span> __future__ <span class="kw">import</span> annotations
+<span class="kw">from</span> typing <span class="kw">import</span> Any, Callable
+<span class="kw">from</span> mcp_tools <span class="kw">import</span> call_tool
+
+ToolFn = Callable[[str, dict[str, Any]], dict[str, Any]]
+
+ELIGIBLE_SCORE = <span class="nu">700</span>
+
+
+<span class="kw">def</span> <span class="fn">policy</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"searchPolicies"</span>, {<span class="str">"query"</span>: prompt})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"policy"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    excerpt = (result[<span class="str">"data"</span>] <span class="kw">or</span> {}).get(<span class="str">"excerpt"</span>, <span class="str">"No policy excerpt found."</span>)
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"policy"</span>, <span class="str">"answer"</span>: excerpt, <span class="str">"customerId"</span>: customer_id}
+
+
+<span class="kw">def</span> <span class="fn">transaction</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"getRecentTransactions"</span>, {<span class="str">"customerId"</span>: customer_id, <span class="str">"size"</span>: <span class="nu">5</span>})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"transaction"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    rows = (result[<span class="str">"data"</span>] <span class="kw">or</span> {}).get(<span class="str">"transactions"</span>) <span class="kw">or</span> []
+    parts = [f<span class="str">"{row.get('postedOn', row.get('date', '?'))} {row.get('description')} {row.get('amount')}"</span> <span class="kw">for</span> row <span class="kw">in</span> rows]
+    answer = <span class="str">"Recent transactions: "</span> + <span class="str">"; "</span>.join(parts)
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"transaction"</span>, <span class="str">"answer"</span>: answer, <span class="str">"customerId"</span>: customer_id}
+
+
+<span class="kw">def</span> <span class="fn">eligibility</span>(customer_id: str, prompt: str, call: ToolFn = call_tool) -&gt; dict[str, Any]:
+    result = call(<span class="str">"getCustomerProfile"</span>, {<span class="str">"customerId"</span>: customer_id})
+    <span class="kw">if not</span> result[<span class="str">"ok"</span>]:
+        <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"eligibility"</span>, <span class="str">"answer"</span>: result[<span class="str">"error"</span>], <span class="str">"customerId"</span>: customer_id}
+    data = result[<span class="str">"data"</span>] <span class="kw">or</span> {}
+    score = int(data.get(<span class="str">"bureauScore"</span>) <span class="kw">or</span> <span class="nu">0</span>)
+    name = data.get(<span class="str">"customerName"</span>) <span class="kw">or</span> customer_id
+    <span class="kw">if</span> score &gt;= ELIGIBLE_SCORE:
+        answer = f<span class="str">"{name} is eligible for the top-up loan; bureau score {score}."</span>
+    <span class="kw">else</span>:
+        answer = f<span class="str">"{name} is not eligible for the top-up loan; bureau score {score}."</span>
+    <span class="kw">return</span> {<span class="str">"agent"</span>: <span class="str">"eligibility"</span>, <span class="str">"answer"</span>: answer, <span class="str">"customerId"</span>: customer_id}</pre>
+      </div>
+
+      <div class="test-box">
+        <div class="test-label">âœ… Test Your Work</div>
+        <div class="test-cmd">cd python-orchestrator &amp;&amp; pytest tests/test_agents.py -q</div>
+        <div class="test-out">3 passed: policy returns 250.00, transaction contains GROCERY, eligibility contains 742 and eligible.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• TASK 4 â•â•â•â•â•â• -->
+<div class="section task-section" id="task4" data-day="2">
+  <div class="sec-lbl">Task 4 of 5 Â· Day 2</div>
+  <div class="task-block">
+    <div class="task-head">
+      <div class="task-num tn4">4</div>
+      <div class="task-title-wrap">
+        <div class="task-label">End-to-End Multi-Process Verification (Day 2)</div>
+        <div class="task-title">Run Both Services Live and Query with PowerShell</div>
+        <div class="task-time">â± ~20 minutes</div>
+      </div>
+    </div>
+    <div class="task-inner">
+      <p>
+        Now start both processes in separate terminals and verify the entire request pipeline.
+      </p>
+
+      <h3>Terminal 1 â€” Launch Python Orchestrator (Port 8090)</h3>
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#4da6ff"></div><span class="code-title">Terminal 1 (PowerShell)</span><span class="ctag ctag-s">POWERSHELL</span></div>
+        <pre class="code">python -m pip install -r orchestrator/requirements.txt
+$env:LAB45_MCP_URL = <span class="str">"http://127.0.0.1:8080/mcp"</span>
+python -m uvicorn app:app --app-dir orchestrator --port 8090</pre>
+      </div>
+
+      <h3 style="margin-top:20px">Terminal 2 â€” Launch Java Gateway (Port 8080)</h3>
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#e8976b"></div><span class="code-title">Terminal 2 (PowerShell)</span><span class="ctag ctag-s">POWERSHELL</span></div>
+        <pre class="code">mvn spring-boot:run</pre>
+      </div>
+
+      <h3 style="margin-top:20px">Terminal 3 â€” Run the 4 Live Test Queries</h3>
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#34d399"></div><span class="code-title">Terminal 3 (PowerShell)</span><span class="ctag ctag-s">POWERSHELL</span></div>
+        <pre class="code"><span class="cm"># Query 1: Policy</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>; <span class="str">"X-RM-Id"</span>=<span class="str">"rm-14"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{"customerId":"10428","prompt":"What is the fee for an outward transfer?"}'</span>
+
+<span class="cm"># Query 2: Transaction</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>; <span class="str">"X-RM-Id"</span>=<span class="str">"rm-14"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{"customerId":"10428","prompt":"Show the last transactions"}'</span>
+
+<span class="cm"># Query 3: Eligibility</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{Authorization=<span class="str">"Bearer lab-token"</span>; <span class="str">"X-RM-Id"</span>=<span class="str">"rm-14"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{"customerId":"10428","prompt":"Is this customer eligible for the top-up loan?"}'</span>
+
+<span class="cm"># Query 4: Unauthenticated Request â€” no bearer, expect 401</span>
+Invoke-RestMethod -Uri http://localhost:8080/v1/copilot/query -Method POST `
+  -Headers @{<span class="str">"X-RM-Id"</span>=<span class="str">"rm-14"</span>} -ContentType <span class="str">"application/json"</span> `
+  -Body <span class="str">'{"customerId":"10428","prompt":"test"}'</span></pre>
+      </div>
+
+      <div class="test-box">
+        <div class="test-label">âœ… Expected Responses</div>
+        <div class="test-out">Query 1: agent: "policy", answer includes "250.00"
+Query 2: agent: "transaction", answer includes "GROCERY"
+Query 3: agent: "eligibility", answer includes "742" and "eligible"
+Query 4: HTTP 401 {"error":"missing token"}</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• TASK 5 â•â•â•â•â•â• -->
+<div class="section task-section" id="task5" data-day="2">
+  <div class="sec-lbl">Task 5 of 5 Â· Day 2</div>
+  <div class="task-block">
+    <div class="task-head">
+      <div class="task-num tn5">5</div>
+      <div class="task-title-wrap">
+        <div class="task-label">Distributed Systems &amp; CAP Theorem (Day 2)</div>
+        <div class="task-title">Task 6: CAP Freshness â€” knowledge.py &amp; reviews/CAP_TRADEOFFS.md</div>
+        <div class="task-time">â± ~25 minutes</div>
+      </div>
+    </div>
+    <div class="task-inner">
+      <p>
+        <strong>Files to edit:</strong> <code>python-orchestrator/orchestrator/knowledge.py</code> (implement <code>freshness()</code>) and <code>reviews/CAP_TRADEOFFS.md</code> (fill in your reasoning)
+      </p>
+
+      <h3>Part A: Implement <code>PolicyKnowledgeBase.freshness()</code> in knowledge.py</h3>
+      <div class="code-wrap">
+        <div class="code-hdr"><div class="dot" style="background:#a78bfa"></div><span class="code-title">python-orchestrator/orchestrator/knowledge.py &#x2014; freshness()</span><span class="ctag ctag-p">PYTHON</span></div>
+        <pre class="code"><span class="kw">def</span> <span class="fn">freshness</span>(self) -&gt; Freshness:
+    now = self._clock()
+    age = now - self._indexed_at
+    age_seconds = <span class="fn">int</span>(age.total_seconds())
+    stale = age &gt; self._max_staleness
+    <span class="kw">return</span> Freshness(
+        stale=stale,
+        age_seconds=age_seconds,
+        max_staleness_seconds=<span class="fn">int</span>(self._max_staleness.total_seconds()),
+        indexed_at=self._indexed_at.isoformat(),
+    )</pre>
+      </div>
+
+      <h3 style="margin-top:20px">Part B: Fill reviews/CAP_TRADEOFFS.md</h3>
+      <div class="code-wrap">
+        <div class="code-hdr"><span class="code-title">reviews/CAP_TRADEOFFS.md</span><span class="ctag ctag-s">MARKDOWN</span></div>
+        <pre class="code"># CAP note â€” fill this during Task 5
+
+1. Which CAP letter does this v1 design give up for specialist reads?
+   - Your answer: C
+
+2. So the pairing for reads is:
+   - Your answer: AP
+
+3. A later `initiatePayment` / debit tool would have to pick:
+   - Your answer: CP
+
+4. In one sentence: what goes wrong if Policy and Transaction both wrote the same balance during a partition?
+   - Your answer: Both nodes would independently deduct funds from the same account balance without synchronization, resulting in double debits and ledger corruption.</pre>
+      </div>
+
+      <div class="test-box">
+        <div class="test-label">âœ… Test Your Work</div>
+        <div class="test-cmd">cd python-orchestrator &amp;&amp; pytest tests/test_knowledge.py -q</div>
+        <div class="test-out">BUILD SUCCESS. Then run `mvn test` and `python -m pytest tests/python -q` to verify entire project suite!</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- â•â•â•â•â•â• COMMON ERRORS â•â•â•â•â•â• -->
+<div class="section" id="errors">
+  <div class="sec-lbl">Troubleshooting</div>
+  <h2>Common Errors and How to Fix Them</h2>
+
+  <table>
+    <tr><th>Error You See</th><th>Root Cause</th><th>Immediate Fix</th></tr>
+    <tr>
+      <td><code>UnsupportedOperationException: TODO Task 1</code></td>
+      <td><code>QueryGateway.handle()</code> has not been implemented yet (throws UnsupportedOperationException).</td>
+      <td>Implement Task 3 in <code>QueryGateway.java</code>.</td>
+    </tr>
+    <tr>
+      <td><code>HTTP 503 {"error":"orchestrator unavailable"}</code> during query</td>
+      <td>Python orchestrator is not running on port 8090.</td>
+      <td>In Terminal 1, run <code>python -m uvicorn app:app --app-dir orchestrator --port 8090</code>.</td>
+    </tr>
+    <tr>
+      <td><code>HTTP 401 {"error":"missing token"}</code></td>
+      <td>Request omitted the Bearer authorization header.</td>
+      <td>Pass <code>-Headers @{Authorization="Bearer lab-token"}</code> in PowerShell.</td>
+    </tr>
+    <tr>
+      <td><code>HTTP 429 {"error":"rm limit"}</code></td>
+      <td>More than 10 requests executed by the same RM in a 1-minute window.</td>
+      <td>Wait 60 seconds for the sliding window token bucket to replenish.</td>
+    </tr>
+    <tr>
+      <td><code>KeyError: 'bureauScore'</code> in <code>agents.py</code></td>
+      <td>The tool result dictionary had a <code>None</code> data payload.</td>
+      <td>Use defensive chaining: <code>data = result["data"] or {}</code>, then <code>data.get("bureauScore")</code>.</td>
+    </tr>
+    <tr>
+      <td><code>test_transaction_includes_grocery</code> fails</td>
+      <td>Transaction line formatting does not include the exact word <code>GROCERY</code>.</td>
+      <td>Check that your string comprehension includes <code>row.get('description')</code>.</td>
+    </tr>
+    <tr>
+      <td>PowerShell: <code>The term 'uvicorn' is not recognized</code></td>
+      <td>Python packages installed in a virtual environment not in PATH.</td>
+      <td>Use <code>python -m uvicorn ...</code> instead of bare <code>uvicorn ...</code>.</td>
+    </tr>
+    <tr>
+      <td>PowerShell: <code>mvn test -Preference</code> errors with redirect</td>
+      <td>PowerShell treats unquoted <code>-Preference</code> as a redirect symbol.</td>
+      <td>Always wrap in quotes: <code>mvn test "-Preference"</code>.</td>
+    </tr>
+  </table>
+</div>
+
+</div><!-- /wrap -->
+
+<footer>
+  Lab 4.5 Participant Guide Â· AI Gateway &amp; Python Orchestrator Â· Enterprise AI Engineering Â· Nuvepro Â· Cohort 1
+</footer>
+
+<script>
+  function filterGuide(mode) {
+    const tasks = document.querySelectorAll('.task-section');
+    const bAll = document.getElementById('pg-btn-all');
+    const b1 = document.getElementById('pg-btn-d1');
+    const b2 = document.getElementById('pg-btn-d2');
+
+    bAll.classList.toggle('active', mode === 'all');
+    b1.classList.toggle('active', mode === '1');
+    b2.classList.toggle('active', mode === '2');
+
+    tasks.forEach(task => {
+      if (mode === 'all') {
+        task.style.display = 'block';
+      } else {
+        task.style.display = (task.dataset.day === mode) ? 'block' : 'none';
+      }
+    });
+
+    const n1 = document.querySelectorAll('.nav-d1');
+    const n2 = document.querySelectorAll('.nav-d2');
+    if (mode === '1') {
+      n1.forEach(el => el.style.display = 'inline-block');
+      n2.forEach(el => el.style.display = 'none');
+    } else if (mode === '2') {
+      n1.forEach(el => el.style.display = 'none');
+      n2.forEach(el => el.style.display = 'inline-block');
+    } else {
+      n1.forEach(el => el.style.display = 'inline-block');
+      n2.forEach(el => el.style.display = 'inline-block');
+    }
+  }
+</script>
+
+</body>
+</html>
+
+
