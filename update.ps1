@@ -4,11 +4,7 @@
 #  Command: irm <raw-github-url-to-this-script> | iex
 # =============================================================================
 
-# ── CONFIGURE THIS before uploading ──────────────────────────────────────────
-# Replace with the raw GitHub URL of the folder where you uploaded the 3 files.
-# Example: https://raw.githubusercontent.com/YashKapoor/lab45-guides/main
-$BASE_URL = "https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main"
-# ─────────────────────────────────────────────────────────────────────────────
+$BASE_URL = "https://raw.githubusercontent.com/Nuvepro-Technologies-Pvt-Ltd/LAB-4.5-File-Updates/refs/heads/main"
 
 $FILES = @(
     "Workbook.ipynb",
@@ -16,14 +12,12 @@ $FILES = @(
     "PARTICIPANT_GUIDE.html"
 )
 
-# Possible project folder locations on lab VMs
 $CANDIDATES = @(
     "C:\Users\$env:USERNAME\Desktop\Project",
     "C:\Users\labuser\Desktop\Project",
     "C:\Users\Administrator\Desktop\Project"
 )
 
-# ── Find the project folder ───────────────────────────────────────────────────
 $projectDir = $null
 foreach ($path in $CANDIDATES) {
     if (Test-Path "$path\pom.xml") {
@@ -45,9 +39,8 @@ if (-not $projectDir) {
     exit 1
 }
 
-# ── Download and replace files ────────────────────────────────────────────────
 Write-Host ""
-Write-Host "  Lab 4.5 — Guide Update" -ForegroundColor Cyan
+Write-Host "  Lab 4.5 - Guide Update" -ForegroundColor Cyan
 Write-Host "  Project folder : $projectDir" -ForegroundColor DarkGray
 Write-Host "  Source         : $BASE_URL" -ForegroundColor DarkGray
 Write-Host ""
